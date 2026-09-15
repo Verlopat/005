@@ -1,15 +1,15 @@
 {
-  "generated_at": "2026-09-15T18:02:28.496Z",
+  "generated_at": "2026-09-15T18:03:47.895Z",
   "num_events_processed": 2000,
   "inference_source": "simulated",
   "benchmark": {
     "events_processed": 500,
-    "elapsed_sec": 4.191664267000306,
-    "measured_throughput_eps": 119.2843625231027,
-    "latency_ms_p50": 7.761411500268878,
-    "latency_ms_p95": 11.379436150355097,
-    "latency_ms_p99": 17.144403440015587,
-    "latency_ms_max": 29.225251999378088
+    "elapsed_sec": 3.8900390759999937,
+    "measured_throughput_eps": 128.53341322065444,
+    "latency_ms_p50": 7.673855500343052,
+    "latency_ms_p95": 7.937422900431557,
+    "latency_ms_p99": 11.440875759644763,
+    "latency_ms_max": 12.911468000311288
   },
   "required_tx_per_sec_calc": {
     "peak_events_per_sec": 10000,

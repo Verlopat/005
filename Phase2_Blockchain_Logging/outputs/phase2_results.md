@@ -1,6 +1,6 @@
 # Objective 2 — Phase 2 Results
 
-Generated: 2026-09-15T18:02:28.496Z
+Generated: 2026-09-15T18:03:47.895Z
 Sample: 2000 rows from `Phase1_Submission/CICIoT2023_Sample.csv`
 Inference source: SIMULATED oracle — torch/model artifact unavailable in this environment
 Ledger backend: `src/ledger/mock_ledger.py` (in-memory, hash-chained, tamper-evident). No Docker/Go/Fabric were available in the environment that generated this report; see the caveats inline below and `../network/` for the production Hyperledger Fabric deployment artifacts.
@@ -9,8 +9,8 @@ Ledger backend: `src/ledger/mock_ledger.py` (in-memory, hash-chained, tamper-evi
 
 | # | Metric | Target / Benchmark | Measured (this run) | Status |
 |---|---|---|---|---|
-| 1 | Blockchain transaction throughput | >1,000 TPS sustained, with Merkle batch aggregation enabled at peak arrival rates | Required tx/sec at 10,000 events/sec peak x 11.43% anchoring rate: 1143 tx/sec unbatched -> 11.4 tx/sec at batch factor 100 (minimum batch factor to clear 1,000 TPS: 2). Measured local software-layer submission throughput (mock ledger, immediate-commit, no batching): 119 events/sec on this machine. | Met by design (batching keeps required TPS far below 1,000); network-level TPS requires deploying network/ on a Fabric-capable host. |
-| 2 | Log commit latency, detection to on-chain confirmation | < 500 ms at the 95th percentile | Software-layer latency (canonicalise+digest+sign+store+commit, mock ledger), n=500: p50=7.761 ms, p95=11.379 ms, p99=17.144 ms, max=29.225 ms. | Met for the software layer with large margin. Real end-to-end figure additionally includes Fabric endorsement/ordering round-trip, measured on a deployed network. |
+| 1 | Blockchain transaction throughput | >1,000 TPS sustained, with Merkle batch aggregation enabled at peak arrival rates | Required tx/sec at 10,000 events/sec peak x 11.43% anchoring rate: 1143 tx/sec unbatched -> 11.4 tx/sec at batch factor 100 (minimum batch factor to clear 1,000 TPS: 2). Measured local software-layer submission throughput (mock ledger, immediate-commit, no batching): 129 events/sec on this machine. | Met by design (batching keeps required TPS far below 1,000); network-level TPS requires deploying network/ on a Fabric-capable host. |
+| 2 | Log commit latency, detection to on-chain confirmation | < 500 ms at the 95th percentile | Software-layer latency (canonicalise+digest+sign+store+commit, mock ledger), n=500: p50=7.674 ms, p95=7.937 ms, p99=11.441 ms, max=12.911 ms. | Met for the software layer with large margin. Real end-to-end figure additionally includes Fabric endorsement/ordering round-trip, measured on a deployed network. |
 | 3 | On-chain storage overhead per event | < 1 KB per record, digest and metadata only | n=200: mean on-chain record size 762 bytes (max 773 bytes) vs mean full off-chain payload 1392 bytes -> 45.2% size reduction. | Met |
 | 4 | Log integrity verification failure rate | 0%; every stored digest verifies against its off-chain payload | 0/300 audited events failed verification (0.00%) under normal operation. Live tamper-injection test: detected (VERIFIED -> TAMPERED, chain integrity check also failed). | Met |
 | 5 | Integrity Coverage Ratio of the anchored record | >= 95% of true attack flows anchored at the deployment gate | At gate=0.95: ICR=0.9897, on-chain volume=0.9730, attacks in sample=1949. Full sweep in the ICR table below. | Met |
