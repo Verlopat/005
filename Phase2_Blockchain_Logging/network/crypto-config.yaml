@@ -1,0 +1,34 @@
+# cryptogen configuration for a two-organisation Fabric consortium, per
+# Objective 2: "The network will be configured as a private consortium
+# chain with dedicated orderer nodes and explicit endorsement policies."
+#
+# Org1 (SecurityOrg) operates the detection agents; Org2 (AuditOrg)
+# operates the compliance/auditor tooling. Splitting them into separate
+# organisations (rather than separate users of one org) means the
+# read/write permissioning Objective 2 specifies is enforced at the
+# network/MSP layer, not only inside chaincode logic.
+OrdererOrgs:
+  - Name: OrdererOrg
+    Domain: orderer.phase2.local
+    EnableNodeOUs: true
+    Specs:
+      - Hostname: orderer1
+      - Hostname: orderer2
+      - Hostname: orderer3
+
+PeerOrgs:
+  - Name: SecurityOrg
+    Domain: security.phase2.local
+    EnableNodeOUs: true
+    Template:
+      Count: 2
+    Users:
+      Count: 2 # includes one non-admin user used to provision the detection agent identity
+
+  - Name: AuditOrg
+    Domain: audit.phase2.local
+    EnableNodeOUs: true
+    Template:
+      Count: 2
+    Users:
+      Count: 2 # includes one non-admin user used to provision the auditor identity

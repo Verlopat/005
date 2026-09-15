@@ -1,0 +1,168 @@
+# Channel and consortium configuration for the securitylogchannel.
+# Raft ordering (pluggable consensus, per Objective 2's platform-selection
+# rationale in docs/architecture.md) with three orderer nodes for
+# crash-fault tolerance.
+Organizations:
+  - &OrdererOrg
+    Name: OrdererOrgMSP
+    ID: OrdererOrgMSP
+    MSPDir: crypto-config/ordererOrganizations/orderer.phase2.local/msp
+    Policies:
+      Readers:
+        Type: Signature
+        Rule: "OR('OrdererOrgMSP.member')"
+      Writers:
+        Type: Signature
+        Rule: "OR('OrdererOrgMSP.member')"
+      Admins:
+        Type: Signature
+        Rule: "OR('OrdererOrgMSP.admin')"
+
+  - &SecurityOrg
+    Name: SecurityOrgMSP
+    ID: SecurityOrgMSP
+    MSPDir: crypto-config/peerOrganizations/security.phase2.local/msp
+    Policies:
+      Readers:
+        Type: Signature
+        Rule: "OR('SecurityOrgMSP.admin', 'SecurityOrgMSP.peer', 'SecurityOrgMSP.client')"
+      Writers:
+        Type: Signature
+        Rule: "OR('SecurityOrgMSP.admin', 'SecurityOrgMSP.client')"
+      Admins:
+        Type: Signature
+        Rule: "OR('SecurityOrgMSP.admin')"
+      Endorsement:
+        Type: Signature
+        Rule: "OR('SecurityOrgMSP.peer')"
+    AnchorPeers:
+      - Host: peer0.security.phase2.local
+        Port: 7051
+
+  - &AuditOrg
+    Name: AuditOrgMSP
+    ID: AuditOrgMSP
+    MSPDir: crypto-config/peerOrganizations/audit.phase2.local/msp
+    Policies:
+      Readers:
+        Type: Signature
+        Rule: "OR('AuditOrgMSP.admin', 'AuditOrgMSP.peer', 'AuditOrgMSP.client')"
+      Writers:
+        Type: Signature
+        Rule: "OR('AuditOrgMSP.admin', 'AuditOrgMSP.client')"
+      Admins:
+        Type: Signature
+        Rule: "OR('AuditOrgMSP.admin')"
+      Endorsement:
+        Type: Signature
+        Rule: "OR('AuditOrgMSP.peer')"
+    AnchorPeers:
+      - Host: peer0.audit.phase2.local
+        Port: 9051
+
+Capabilities:
+  Channel: &ChannelCapabilities
+    V2_0: true
+  Orderer: &OrdererCapabilities
+    V2_0: true
+  Application: &ApplicationCapabilities
+    V2_0: true
+
+Application: &ApplicationDefaults
+  Organizations:
+  Policies:
+    Readers:
+      Type: ImplicitMeta
+      Rule: "ANY Readers"
+    Writers:
+      Type: ImplicitMeta
+      Rule: "ANY Writers"
+    Admins:
+      Type: ImplicitMeta
+      Rule: "MAJORITY Admins"
+    # Endorsement policy: an event is only committed once both the
+    # SecurityOrg peer (which validated the submitting detection agent's
+    # identity) AND the AuditOrg peer (an independent party) have
+    # endorsed it. This is the concrete mechanism behind "cryptographic
+    # immutability, decentralised consensus ... ensure that a committed
+    # event cannot be modified, deleted or repudiated by any single party"
+    # (Objective 2) — no single organisation can unilaterally commit.
+    Endorsement:
+      Type: ImplicitMeta
+      Rule: "MAJORITY Endorsement"
+  Capabilities:
+    <<: *ApplicationCapabilities
+
+Orderer: &OrdererDefaults
+  OrdererType: etcdraft
+  Addresses:
+    - orderer1.orderer.phase2.local:7050
+    - orderer2.orderer.phase2.local:8050
+    - orderer3.orderer.phase2.local:9050
+  EtcdRaft:
+    Consenters:
+      - Host: orderer1.orderer.phase2.local
+        Port: 7050
+        ClientTLSCert: crypto-config/ordererOrganizations/orderer.phase2.local/orderers/orderer1.orderer.phase2.local/tls/server.crt
+        ServerTLSCert: crypto-config/ordererOrganizations/orderer.phase2.local/orderers/orderer1.orderer.phase2.local/tls/server.crt
+      - Host: orderer2.orderer.phase2.local
+        Port: 8050
+        ClientTLSCert: crypto-config/ordererOrganizations/orderer.phase2.local/orderers/orderer2.orderer.phase2.local/tls/server.crt
+        ServerTLSCert: crypto-config/ordererOrganizations/orderer.phase2.local/orderers/orderer2.orderer.phase2.local/tls/server.crt
+      - Host: orderer3.orderer.phase2.local
+        Port: 9050
+        ClientTLSCert: crypto-config/ordererOrganizations/orderer.phase2.local/orderers/orderer3.orderer.phase2.local/tls/server.crt
+        ServerTLSCert: crypto-config/ordererOrganizations/orderer.phase2.local/orderers/orderer3.orderer.phase2.local/tls/server.crt
+  Organizations:
+    - *OrdererOrg
+  Policies:
+    Readers:
+      Type: ImplicitMeta
+      Rule: "ANY Readers"
+    Writers:
+      Type: ImplicitMeta
+      Rule: "ANY Writers"
+    Admins:
+      Type: ImplicitMeta
+      Rule: "MAJORITY Admins"
+    BlockValidation:
+      Type: ImplicitMeta
+      Rule: "ANY Writers"
+
+Channel: &ChannelDefaults
+  Policies:
+    Readers:
+      Type: ImplicitMeta
+      Rule: "ANY Readers"
+    Writers:
+      Type: ImplicitMeta
+      Rule: "ANY Writers"
+    Admins:
+      Type: ImplicitMeta
+      Rule: "MAJORITY Admins"
+  Capabilities:
+    <<: *ChannelCapabilities
+
+Profiles:
+  Phase2OrdererGenesis:
+    <<: *ChannelDefaults
+    Orderer:
+      <<: *OrdererDefaults
+      Organizations:
+        - *OrdererOrg
+    Consortiums:
+      Phase2Consortium:
+        Organizations:
+          - *SecurityOrg
+          - *AuditOrg
+
+  SecurityLogChannel:
+    Consortium: Phase2Consortium
+    <<: *ChannelDefaults
+    Application:
+      <<: *ApplicationDefaults
+      Organizations:
+        - *SecurityOrg
+        - *AuditOrg
+      Capabilities:
+        <<: *ApplicationCapabilities

@@ -1,0 +1,200 @@
+# Two-organisation Hyperledger Fabric network for Phase 2.
+#
+# Topology: 3 Raft orderers (crash-fault tolerant ordering service),
+# 2 peers for SecurityOrg (detection agents submit here), 2 peers for
+# AuditOrg (auditors/compliance officers read here), and one Fabric CA per
+# organisation issuing identities with the phase2.detectionAgent /
+# phase2.auditor attributes that chaincode/securitylog/securitylog.go
+# checks for access control.
+#
+# Bring up with network/scripts/network-up.sh, which runs cryptogen +
+# configtxgen against crypto-config.yaml / configtx.yaml before this file
+# is used, then this compose file, then deploy-chaincode.sh.
+#
+# Requires Docker, Docker Compose, and the Fabric binaries/images
+# (cryptogen, configtxgen, peer, hyperledger/fabric-orderer,
+# hyperledger/fabric-peer, hyperledger/fabric-ca) on the host machine.
+# This sandbox has neither Docker nor Go installed, so this file is a
+# deployment artifact for a real host, not something exercised by
+# scripts/run_phase2_demo.py, which uses MockLedger instead.
+version: "3.7"
+
+networks:
+  phase2:
+    name: phase2_network
+
+volumes:
+  orderer1.orderer.phase2.local:
+  orderer2.orderer.phase2.local:
+  orderer3.orderer.phase2.local:
+  peer0.security.phase2.local:
+  peer1.security.phase2.local:
+  peer0.audit.phase2.local:
+  peer1.audit.phase2.local:
+
+services:
+  ca.security.phase2.local:
+    image: hyperledger/fabric-ca:1.5
+    environment:
+      - FABRIC_CA_HOME=/etc/hyperledger/fabric-ca-server
+      - FABRIC_CA_SERVER_CA_NAME=ca-security
+      - FABRIC_CA_SERVER_TLS_ENABLED=true
+    ports:
+      - "7054:7054"
+    command: sh -c 'fabric-ca-server start -b admin:adminpw -d'
+    volumes:
+      - ./network-artifacts/fabric-ca/security:/etc/hyperledger/fabric-ca-server
+    networks: [phase2]
+
+  ca.audit.phase2.local:
+    image: hyperledger/fabric-ca:1.5
+    environment:
+      - FABRIC_CA_HOME=/etc/hyperledger/fabric-ca-server
+      - FABRIC_CA_SERVER_CA_NAME=ca-audit
+      - FABRIC_CA_SERVER_TLS_ENABLED=true
+    ports:
+      - "8054:7054"
+    command: sh -c 'fabric-ca-server start -b admin:adminpw -d'
+    volumes:
+      - ./network-artifacts/fabric-ca/audit:/etc/hyperledger/fabric-ca-server
+    networks: [phase2]
+
+  orderer1.orderer.phase2.local:
+    image: hyperledger/fabric-orderer:2.5
+    environment:
+      - FABRIC_LOGGING_SPEC=INFO
+      - ORDERER_GENERAL_LISTENADDRESS=0.0.0.0
+      - ORDERER_GENERAL_LISTENPORT=7050
+      - ORDERER_GENERAL_GENESISMETHOD=file
+      - ORDERER_GENERAL_GENESISFILE=/var/hyperledger/orderer/genesisblock/phase2-genesis.block
+      - ORDERER_GENERAL_LOCALMSPID=OrdererOrgMSP
+      - ORDERER_GENERAL_LOCALMSPDIR=/var/hyperledger/orderer/msp
+      - ORDERER_GENERAL_TLS_ENABLED=true
+    working_dir: /root
+    command: orderer
+    volumes:
+      - ./network-artifacts/channel-artifacts:/var/hyperledger/orderer/genesisblock
+      - ./crypto-config/ordererOrganizations/orderer.phase2.local/orderers/orderer1.orderer.phase2.local/msp:/var/hyperledger/orderer/msp
+      - ./crypto-config/ordererOrganizations/orderer.phase2.local/orderers/orderer1.orderer.phase2.local/tls:/var/hyperledger/orderer/tls
+      - orderer1.orderer.phase2.local:/var/hyperledger/production/orderer
+    ports:
+      - "7050:7050"
+    networks: [phase2]
+
+  orderer2.orderer.phase2.local:
+    image: hyperledger/fabric-orderer:2.5
+    environment:
+      - FABRIC_LOGGING_SPEC=INFO
+      - ORDERER_GENERAL_LISTENADDRESS=0.0.0.0
+      - ORDERER_GENERAL_LISTENPORT=8050
+      - ORDERER_GENERAL_GENESISMETHOD=file
+      - ORDERER_GENERAL_GENESISFILE=/var/hyperledger/orderer/genesisblock/phase2-genesis.block
+      - ORDERER_GENERAL_LOCALMSPID=OrdererOrgMSP
+      - ORDERER_GENERAL_LOCALMSPDIR=/var/hyperledger/orderer/msp
+      - ORDERER_GENERAL_TLS_ENABLED=true
+    command: orderer
+    volumes:
+      - ./network-artifacts/channel-artifacts:/var/hyperledger/orderer/genesisblock
+      - ./crypto-config/ordererOrganizations/orderer.phase2.local/orderers/orderer2.orderer.phase2.local/msp:/var/hyperledger/orderer/msp
+      - ./crypto-config/ordererOrganizations/orderer.phase2.local/orderers/orderer2.orderer.phase2.local/tls:/var/hyperledger/orderer/tls
+      - orderer2.orderer.phase2.local:/var/hyperledger/production/orderer
+    ports:
+      - "8050:8050"
+    networks: [phase2]
+
+  orderer3.orderer.phase2.local:
+    image: hyperledger/fabric-orderer:2.5
+    environment:
+      - FABRIC_LOGGING_SPEC=INFO
+      - ORDERER_GENERAL_LISTENADDRESS=0.0.0.0
+      - ORDERER_GENERAL_LISTENPORT=9050
+      - ORDERER_GENERAL_GENESISMETHOD=file
+      - ORDERER_GENERAL_GENESISFILE=/var/hyperledger/orderer/genesisblock/phase2-genesis.block
+      - ORDERER_GENERAL_LOCALMSPID=OrdererOrgMSP
+      - ORDERER_GENERAL_LOCALMSPDIR=/var/hyperledger/orderer/msp
+      - ORDERER_GENERAL_TLS_ENABLED=true
+    command: orderer
+    volumes:
+      - ./network-artifacts/channel-artifacts:/var/hyperledger/orderer/genesisblock
+      - ./crypto-config/ordererOrganizations/orderer.phase2.local/orderers/orderer3.orderer.phase2.local/msp:/var/hyperledger/orderer/msp
+      - ./crypto-config/ordererOrganizations/orderer.phase2.local/orderers/orderer3.orderer.phase2.local/tls:/var/hyperledger/orderer/tls
+      - orderer3.orderer.phase2.local:/var/hyperledger/production/orderer
+    ports:
+      - "9050:9050"
+    networks: [phase2]
+
+  peer0.security.phase2.local:
+    image: hyperledger/fabric-peer:2.5
+    environment:
+      - CORE_PEER_ID=peer0.security.phase2.local
+      - CORE_PEER_ADDRESS=peer0.security.phase2.local:7051
+      - CORE_PEER_LISTENADDRESS=0.0.0.0:7051
+      - CORE_PEER_LOCALMSPID=SecurityOrgMSP
+      - CORE_PEER_MSPCONFIGPATH=/etc/hyperledger/fabric/msp
+      - CORE_PEER_TLS_ENABLED=true
+      - CORE_VM_ENDPOINT=unix:///host/var/run/docker.sock
+      - CORE_VM_DOCKER_HOSTCONFIG_NETWORKMODE=phase2_network
+    working_dir: /root
+    command: peer node start
+    volumes:
+      - /var/run/docker.sock:/host/var/run/docker.sock
+      - ./crypto-config/peerOrganizations/security.phase2.local/peers/peer0.security.phase2.local/msp:/etc/hyperledger/fabric/msp
+      - ./crypto-config/peerOrganizations/security.phase2.local/peers/peer0.security.phase2.local/tls:/etc/hyperledger/fabric/tls
+      - peer0.security.phase2.local:/var/hyperledger/production
+    ports:
+      - "7051:7051"
+    networks: [phase2]
+
+  peer1.security.phase2.local:
+    image: hyperledger/fabric-peer:2.5
+    environment:
+      - CORE_PEER_ID=peer1.security.phase2.local
+      - CORE_PEER_ADDRESS=peer1.security.phase2.local:7151
+      - CORE_PEER_LISTENADDRESS=0.0.0.0:7151
+      - CORE_PEER_LOCALMSPID=SecurityOrgMSP
+      - CORE_PEER_MSPCONFIGPATH=/etc/hyperledger/fabric/msp
+      - CORE_PEER_TLS_ENABLED=true
+    command: peer node start
+    volumes:
+      - ./crypto-config/peerOrganizations/security.phase2.local/peers/peer1.security.phase2.local/msp:/etc/hyperledger/fabric/msp
+      - ./crypto-config/peerOrganizations/security.phase2.local/peers/peer1.security.phase2.local/tls:/etc/hyperledger/fabric/tls
+      - peer1.security.phase2.local:/var/hyperledger/production
+    ports:
+      - "7151:7151"
+    networks: [phase2]
+
+  peer0.audit.phase2.local:
+    image: hyperledger/fabric-peer:2.5
+    environment:
+      - CORE_PEER_ID=peer0.audit.phase2.local
+      - CORE_PEER_ADDRESS=peer0.audit.phase2.local:9051
+      - CORE_PEER_LISTENADDRESS=0.0.0.0:9051
+      - CORE_PEER_LOCALMSPID=AuditOrgMSP
+      - CORE_PEER_MSPCONFIGPATH=/etc/hyperledger/fabric/msp
+      - CORE_PEER_TLS_ENABLED=true
+    command: peer node start
+    volumes:
+      - ./crypto-config/peerOrganizations/audit.phase2.local/peers/peer0.audit.phase2.local/msp:/etc/hyperledger/fabric/msp
+      - ./crypto-config/peerOrganizations/audit.phase2.local/peers/peer0.audit.phase2.local/tls:/etc/hyperledger/fabric/tls
+      - peer0.audit.phase2.local:/var/hyperledger/production
+    ports:
+      - "9051:9051"
+    networks: [phase2]
+
+  peer1.audit.phase2.local:
+    image: hyperledger/fabric-peer:2.5
+    environment:
+      - CORE_PEER_ID=peer1.audit.phase2.local
+      - CORE_PEER_ADDRESS=peer1.audit.phase2.local:9151
+      - CORE_PEER_LISTENADDRESS=0.0.0.0:9151
+      - CORE_PEER_LOCALMSPID=AuditOrgMSP
+      - CORE_PEER_MSPCONFIGPATH=/etc/hyperledger/fabric/msp
+      - CORE_PEER_TLS_ENABLED=true
+    command: peer node start
+    volumes:
+      - ./crypto-config/peerOrganizations/audit.phase2.local/peers/peer1.audit.phase2.local/msp:/etc/hyperledger/fabric/msp
+      - ./crypto-config/peerOrganizations/audit.phase2.local/peers/peer1.audit.phase2.local/tls:/etc/hyperledger/fabric/tls
+      - peer1.audit.phase2.local:/var/hyperledger/production
+    ports:
+      - "9151:9151"
+    networks: [phase2]
