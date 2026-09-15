@@ -15,15 +15,18 @@ VENV_DIR = ROOT / ".venv"
 PHASES = {
     "phase1": {
         "requirements": [ROOT / "Phase1_Submission" / "requirements.txt"],
-        "command": [ROOT / "Phase1_Submission" / "interactive_inference.py"],
+        "commands": [[ROOT / "Phase1_Submission" / "interactive_inference.py"]],
     },
     "phase2": {
         "requirements": [ROOT / "Phase2_Blockchain_Logging" / "requirements.txt"],
-        "command": [ROOT / "Phase2_Blockchain_Logging" / "scripts" / "run_phase2_demo.py"],
+        "commands": [
+            [ROOT / "Phase2_Blockchain_Logging" / "scripts" / "run_phase2_demo.py"],
+            [ROOT / "Phase2_Blockchain_Logging" / "scripts" / "tamper_demo.py"],
+        ],
     },
     "phase3": {
         "requirements": [ROOT / "Phase3_Performance_Optimization" / "requirements.txt"],
-        "command": [ROOT / "Phase3_Performance_Optimization" / "scripts" / "run_load_test.py"],
+        "commands": [[ROOT / "Phase3_Performance_Optimization" / "scripts" / "run_load_test.py"]],
     },
 }
 
@@ -56,10 +59,11 @@ def launch(phase: str) -> None:
     config = PHASES[phase]
     python = ensure_venv()
     install_requirements(python, config["requirements"])
-    entry_point = config["command"][0]
-    if not entry_point.is_file():
-        raise FileNotFoundError(f"Entry point not found: {entry_point}")
-    run([str(python), *map(str, config["command"])], cwd=entry_point.parent)
+    for command in config["commands"]:
+        entry_point = command[0]
+        if not entry_point.is_file():
+            raise FileNotFoundError(f"Entry point not found: {entry_point}")
+        run([str(python), *map(str, command)], cwd=entry_point.parent)
 
 
 def main() -> None:
