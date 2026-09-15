@@ -1,0 +1,11 @@
+# Runtime state written by load tests, stability soak tests, and demos
+.phase3_runtime/
+
+# Python
+__pycache__/
+*.py[cod]
+.pytest_cache/
+
+# Generated evidence scratch (final reports/JSON ARE committed on purpose)
+outputs/_run_evidence/
+outputs/_stability_evidence/

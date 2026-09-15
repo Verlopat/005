@@ -1,0 +1,8 @@
+# Optional, production-only dependency for perf/async_pipeline.py's KafkaBackend.
+# NOT required for the default local-development/demo path (InMemoryQueueBackend),
+# so CI and the sandbox this framework was scaffolded in never need a Kafka
+# broker running.
+#
+# Install on a host with a reachable Kafka cluster (see docs/async_pipeline.md
+# for the minimal docker-compose broker used to validate KafkaBackend).
+kafka-python>=2.0.2
