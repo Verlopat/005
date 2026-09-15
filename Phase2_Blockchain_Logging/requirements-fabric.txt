@@ -1,0 +1,11 @@
+# Optional, production-only dependencies for src/ledger/fabric_gateway.py.
+# NOT required for the default local-development/demo path (MockLedger),
+# and intentionally kept out of requirements.txt so CI and the sandbox
+# demo never need a Fabric network or grpc toolchain installed.
+#
+# Install on a host that also has a deployed Hyperledger Fabric network
+# (see ../network/) reachable via the gateway_config referenced in
+# config/phase2.example.yaml.
+grpcio>=1.60.0
+hyperledger-fabric-gateway>=1.4.0
+ipfshttpclient>=0.8.0a2
