@@ -1,0 +1,16 @@
+# Runtime evidence, identities, keys, certificates, receipts, and local Fabric state
+.phase2_runtime/
+network-artifacts/
+wallet/
+
+# Python
+__pycache__/
+*.py[cod]
+.pytest_cache/
+
+# Environment files must be made from templates and never committed
+.env
+*.pem
+*.key
+*.crt
+*.p12

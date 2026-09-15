@@ -1,0 +1,11 @@
+policy_version: 1
+
+# Anchor only attack verdicts by default. A category-specific threshold takes
+# precedence over the global confidence threshold when it is configured.
+anchor_attack_only: true
+confidence_threshold: 0.0
+category_thresholds: {}
+
+severity_by_threat:
+  ATTACK: "high"
+  BENIGN: "informational"

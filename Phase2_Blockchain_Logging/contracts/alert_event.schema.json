@@ -1,0 +1,24 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://verlopat.example/contracts/stahn-alert-event-1.0.0.json",
+  "title": "STAHN Security Alert Event",
+  "description": "Frozen cross-layer alert contract for Phase 1 detection and Phase 2 evidence logging.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "contract_version",
+    "event_id",
+    "timestamp",
+    "verdict",
+    "threat_category",
+    "severity",
+    "calibrated_confidence",
+    "source_address",
+    "destination_address",
+    "resource_id",
+    "triggering_features",
+    "model",
+    "feature_attributions",
+    "inference_latency_ms"
+  ],
+  

@@ -1,0 +1,28 @@
+contract_version: "1.0.0"
+
+model:
+  id: "stahn-phase1"
+  version: "phase1-submission"
+
+# Policy defaults are intentionally conservative. Their measured operating values
+# will be set after Phase 1 confidence-gate analysis is imported in Commit 3.
+anchoring:
+  enabled: true
+  anchor_attack_only: true
+  confidence_threshold: 0.0
+  category_thresholds: {}
+
+storage:
+  backend: "local_content_addressed"
+  root: ".phase2_runtime/evidence"
+
+agent:
+  id: "stahn-detector-agent-001"
+  key_path: ".phase2_runtime/keys/detection_agent_ed25519.pem"
+
+ledger:
+  backend: "fabric"
+  enabled: false
+  channel: "securitylogchannel"
+  chaincode: "securitylog"
+  gateway_config: ".phase2_runtime/fabric-gateway.json"
