@@ -1,44 +1,50 @@
-# Blockchain-Enabled Cloud Anomaly Detection
+# Three-Phase Security Pipeline
 
-A phased research/engineering project building a machine-learning intrusion
-detection layer and a blockchain-based tamper-proof evidence logging layer
-around it. See `Research_Objectives_Revised.docx` for the full academic
-objectives; each phase folder below corresponds to one research objective.
+This repository contains a three-stage project:
 
-## Phases
-
-| Folder | Objective | Status |
-|---|---|---|
-| `Phase1_Submission/` | Objective 1 — ML detection layer (STAHN model on CICIoT2023) | Delivered |
-| `Phase2_Blockchain_Logging/` | Objective 2 — blockchain-based tamper-proof security event logging | Complete for this phase — see its README |
-| `Phase3_Performance_Optimization/` | Objective 3 — performance optimisation, scalability validation, comparative benchmarking | Complete for this phase — see its README |
+- **Phase 1 — Submission:** STAHN model inference and evaluation assets.
+- **Phase 2 — Blockchain Logging:** audit logging and blockchain demonstration tooling.
+- **Phase 3 — Performance Optimization:** load and stability testing tooling.
 
 ## Quick start
 
-```bash
-git clone <repo-link>
-cd 005
-python3 -m pip install -r Phase1_Submission/requirements.txt
-python3 run.py                 # interactive Phase 1 STAHN inference
-```
+Run the unified launcher from the repository root with Python 3:
 
 ```bash
-python3 -m pip install -r Phase2_Blockchain_Logging/requirements.txt
-python3 run_phase2.py                                            # generates the Objective 2 paper results report
-python3 Phase2_Blockchain_Logging/scripts/tamper_demo.py         # live tamper-detection proof
-python -m pytest Phase2_Blockchain_Logging/tests/ -v             # 56 tests
+python main.py phase1
+python main.py phase2
+python main.py phase3
+python main.py all
 ```
 
-`run_phase2.py`'s report (`Phase2_Blockchain_Logging/outputs/phase2_results.md`)
-is the file to cite in the paper's evaluation section for Objective 2.
+On first use, `main.py` creates (or reuses) `.venv`, upgrades `pip`, installs the selected phase's `requirements.txt`, and launches that phase's primary script. It installs dependencies only for the phase being run; `all` processes the phases in order.
+
+## What each command runs
+
+| Command | Requirements | Entry point |
+| --- | --- | --- |
+| `phase1` | `Phase1_Submission/requirements.txt` | `Phase1_Submission/interactive_inference.py` |
+| `phase2` | `Phase2_Blockchain_Logging/requirements.txt` | `Phase2_Blockchain_Logging/scripts/run_phase2_demo.py` |
+| `phase3` | `Phase3_Performance_Optimization/requirements.txt` | `Phase3_Performance_Optimization/scripts/run_load_test.py` |
+
+## Additional dependencies
+
+Phase 2 and Phase 3 include optional environment-specific dependency files (`requirements-fabric.txt` and `requirements-kafka.txt`). Install them manually only when working with their respective Fabric or Kafka integrations:
 
 ```bash
-python3 -m pip install -r Phase3_Performance_Optimization/requirements.txt
-python3 run_phase3.py                                            # generates the Objective 3 paper results report
-python -m pytest Phase3_Performance_Optimization/tests/ -v       # 27 tests
+.venv/bin/python -m pip install -r Phase2_Blockchain_Logging/requirements-fabric.txt
+.venv/bin/python -m pip install -r Phase3_Performance_Optimization/requirements-kafka.txt
 ```
 
-See `Phase2_Blockchain_Logging/README.md` and `Phase3_Performance_Optimization/README.md`
-for full documentation, including how to deploy the real Hyperledger Fabric
-network once Docker/Go are available and how to run the full 24-hour
-stability soak test.
+On Windows, use `.venv\Scripts\python.exe` instead of `.venv/bin/python`.
+
+## Repository layout
+
+```text
+Phase1_Submission/                 Model submission, inference, and evaluation
+Phase2_Blockchain_Logging/         Blockchain audit logging implementation
+Phase3_Performance_Optimization/   Performance test implementation
+main.py                            Unified environment and phase launcher
+```
+
+The older root launch scripts have been consolidated into `main.py`.
