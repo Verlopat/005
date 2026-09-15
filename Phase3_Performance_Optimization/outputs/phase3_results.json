@@ -1,0 +1,224 @@
+{
+  "generated_at": "2026-09-15T18:28:46.249Z",
+  "num_events": 1500,
+  "e2e_latency": {
+    "n": 400,
+    "p50_ms": 80.01744747161865,
+    "p95_ms": 147.9132533073425,
+    "p99_ms": 153.71839046478271,
+    "max_ms": 155.08222579956055
+  },
+  "instance_sweep": [
+    {
+      "num_instances": 100,
+      "events_processed": 150,
+      "elapsed_sec": 1.2078788890003125,
+      "throughput_eps": 124.18463586539362,
+      "latency_ms_p50": 7.681405999846902,
+      "latency_ms_p95": 8.122380600025279,
+      "cpu_utilisation_fraction": 1.0013548438621989,
+      "rss_mb_peak": 323.15625
+    },
+    {
+      "num_instances": 1000,
+      "events_processed": 150,
+      "elapsed_sec": 1.2180873879997307,
+      "throughput_eps": 123.14387414052526,
+      "latency_ms_p50": 7.620814999881986,
+      "latency_ms_p95": 10.344189350280404,
+      "cpu_utilisation_fraction": 0.9931836933066022,
+      "rss_mb_peak": 379.66015625
+    },
+    {
+      "num_instances": 5000,
+      "events_processed": 150,
+      "elapsed_sec": 1.1988152710000577,
+      "throughput_eps": 125.1235312300195,
+      "latency_ms_p50": 7.661377499971422,
+      "latency_ms_p95": 8.102292650346495,
+      "cpu_utilisation_fraction": 1.000795959714458,
+      "rss_mb_peak": 380.24609375
+    },
+    {
+      "num_instances": 10000,
+      "events_processed": 150,
+      "elapsed_sec": 1.2028337400006421,
+      "throughput_eps": 124.70551416351185,
+      "latency_ms_p50": 7.679604500026471,
+      "latency_ms_p95": 8.223471449991845,
+      "cpu_utilisation_fraction": 0.9973839773582086,
+      "rss_mb_peak": 380.73046875
+    }
+  ],
+  "arrival_sweep": [
+    {
+      "target_arrival_rate_eps": 200,
+      "duration_sec": 3.0007401170005323,
+      "submitted": 561,
+      "committed": 561,
+      "dead_lettered": 0,
+      "achieved_arrival_rate_eps": 186.95387741900225,
+      "achieved_commit_rate_eps": 186.95387741900225,
+      "max_queue_depth_observed": 1,
+      "backlog_at_end": 0,
+      "keeping_up": true
+    },
+    {
+      "target_arrival_rate_eps": 800,
+      "duration_sec": 3.001221419000103,
+      "submitted": 1909,
+      "committed": 1909,
+      "dead_lettered": 0,
+      "achieved_arrival_rate_eps": 636.0743622294981,
+      "achieved_commit_rate_eps": 636.0743622294981,
+      "max_queue_depth_observed": 2,
+      "backlog_at_end": 0,
+      "keeping_up": true
+    },
+    {
+      "target_arrival_rate_eps": 2000,
+      "duration_sec": 3.0008609669994257,
+      "submitted": 3801,
+      "committed": 3801,
+      "dead_lettered": 0,
+      "achieved_arrival_rate_eps": 1266.636489260826,
+      "achieved_commit_rate_eps": 1266.636489260826,
+      "max_queue_depth_observed": 2421,
+      "backlog_at_end": 2421,
+      "keeping_up": false
+    },
+    {
+      "target_arrival_rate_eps": 5000,
+      "duration_sec": 3.000220774999434,
+      "submitted": 6300,
+      "committed": 6300,
+      "dead_lettered": 0,
+      "achieved_arrival_rate_eps": 2099.845468872599,
+      "achieved_commit_rate_eps": 2099.845468872599,
+      "max_queue_depth_observed": 4824,
+      "backlog_at_end": 4824,
+      "keeping_up": false
+    },
+    {
+      "target_arrival_rate_eps": 10000,
+      "duration_sec": 3.000367892000213,
+      "submitted": 7406,
+      "committed": 7294,
+      "dead_lettered": 0,
+      "achieved_arrival_rate_eps": 2468.36396954733,
+      "achieved_commit_rate_eps": 2431.0352138641942,
+      "max_queue_depth_observed": 5037,
+      "backlog_at_end": 5037,
+      "keeping_up": false
+    }
+  ],
+  "ledger_write_reduction": {
+    "on_chain_bytes_mean": 762.46,
+    "full_payload_bytes_mean": 1391.94,
+    "registered_anchoring_rate": 0.1143,
+    "measured_anchoring_rate": 0.973,
+    "batch_factor": 100,
+    "tx_count_reduction_pct": 99.0,
+    "min_batch_factor_for_1000tps": 2,
+    "offchain_marginal_reduction_pct": 45.22321364426628,
+    "combined_reduction_at_registered_rate_pct": 93.73901331953964,
+    "combined_reduction_at_measured_rate_pct": 46.702186875871085
+  },
+  "icr": {
+    "aggregate_at_gate": {
+      "gate": 0.95,
+      "integrity_coverage_ratio": 0.98224043715847,
+      "on_chain_volume": 0.9693333333333334,
+      "attack_count": 1464
+    },
+    "per_category_no_flooring": {
+      "DDoS": {
+        "gate_used": 0.95,
+        "attack_count": 1017,
+        "icr": 1.0
+      },
+      "DoS": {
+        "gate_used": 0.95,
+        "attack_count": 287,
+        "icr": 1.0
+      },
+      "Mirai": {
+        "gate_used": 0.95,
+        "attack_count": 111,
+        "icr": 1.0
+      },
+      "Recon": {
+        "gate_used": 0.95,
+        "attack_count": 22,
+        "icr": 1.0
+      },
+      "Spoofing": {
+        "gate_used": 0.95,
+        "attack_count": 26,
+        "icr": 0.0
+      },
+      "BruteForce": {
+        "gate_used": 0.95,
+        "attack_count": 1,
+        "icr": 1.0
+      }
+    },
+    "per_category_with_flooring": {
+      "DDoS": {
+        "gate_used": 0.95,
+        "attack_count": 1017,
+        "icr": 1.0
+      },
+      "DoS": {
+        "gate_used": 0.95,
+        "attack_count": 287,
+        "icr": 1.0
+      },
+      "Mirai": {
+        "gate_used": 0.95,
+        "attack_count": 111,
+        "icr": 1.0
+      },
+      "Recon": {
+        "gate_used": 0.95,
+        "attack_count": 22,
+        "icr": 1.0
+      },
+      "Spoofing": {
+        "gate_used": 0.2,
+        "attack_count": 26,
+        "icr": 1.0
+      },
+      "BruteForce": {
+        "gate_used": 0.95,
+        "attack_count": 1,
+        "icr": 1.0
+      }
+    },
+    "category_floors": {
+      "Spoofing": 0.2
+    }
+  },
+  "processor_overhead": {
+    "baseline_cpu_time_sec": 2.83,
+    "integrated_cpu_time_sec": 3.1,
+    "baseline_cpu_utilisation_fraction": 1.0033065228573057,
+    "integrated_cpu_utilisation_fraction": 0.9989202970186359,
+    "baseline_wall_clock_sec": 2.820673378999345,
+    "integrated_wall_clock_sec": 3.103350696999769,
+    "overhead_pct": 9.540636042402827,
+    "baseline_rss_mb_peak": 206.0703125,
+    "integrated_rss_mb_peak": 208.05078125
+  },
+  "stability_short_run": {
+    "duration_sec": 8.01199139000073,
+    "submitted": 2219,
+    "committed": 2219,
+    "dead_lettered": 0,
+    "zero_event_loss": true,
+    "clean_shutdown": true,
+    "injected_transient_failures": 232,
+    "max_consecutive_dead_letters": 0,
+    "unhandled_exceptions": 0
+  }
+}
