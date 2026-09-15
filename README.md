@@ -24,10 +24,13 @@ python3 run.py                 # interactive Phase 1 STAHN inference
 
 ```bash
 python3 -m pip install -r Phase2_Blockchain_Logging/requirements.txt
-python3 Phase2_Blockchain_Logging/scripts/run_phase2_demo.py     # end-to-end evidence pipeline demo
+python3 run_phase2.py                                            # generates the Objective 2 paper results report
 python3 Phase2_Blockchain_Logging/scripts/tamper_demo.py         # live tamper-detection proof
 python -m pytest Phase2_Blockchain_Logging/tests/ -v             # 56 tests
 ```
+
+`run_phase2.py`'s report (`Phase2_Blockchain_Logging/outputs/phase2_results.md`)
+is the file to cite in the paper's evaluation section for Objective 2.
 
 See `Phase2_Blockchain_Logging/README.md` for the full Phase 2 documentation,
 including how to deploy the real Hyperledger Fabric network once Docker/Go

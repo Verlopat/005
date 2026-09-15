@@ -75,6 +75,35 @@ Fabric-only dependencies (grpc, the Fabric Gateway client, IPFS client) are
 kept separate in `requirements-fabric.txt` so the default path never needs
 them.
 
+## Generate the paper results (single command)
+
+```bash
+python3 run_phase2.py
+```
+
+Run this from the repository root. It checks dependencies, then runs the
+full pipeline over real rows of `../Phase1_Submission/CICIoT2023_Sample.csv`
+and measures every metric in Objective 2's Success Metrics table
+(throughput, commit latency, on-chain storage overhead, integrity
+verification failure rate plus a live tamper-injection proof, Integrity
+Coverage Ratio, canonical digest agreement, model provenance
+traceability, non-repudiation). It prints the full report to the terminal
+and writes it to:
+
+- `Phase2_Blockchain_Logging/outputs/phase2_results.md` — a ready-to-paste
+  Markdown table plus methodological notes for your paper's evaluation
+  section (these are committed to the repo so the numbers are citable).
+- `Phase2_Blockchain_Logging/outputs/phase2_results.json` — the same
+  numbers as raw data, for plotting.
+
+Tune the run with `python3 run_phase2.py --num-events 5000 --gate 0.95`
+(more rows for tighter statistics; `--gate` sets the anchoring confidence
+threshold the Integrity Coverage Ratio metric is reported at). The report
+is explicit about which figures are genuine software-layer measurements
+versus what still requires a deployed Fabric network, per the 'Two
+deployment targets' section above and the report's own 'Methodological
+notes' section, which should be read before citing a number in a paper.
+
 ## Run the end-to-end demo (no Docker/Fabric required)
 
 ```bash

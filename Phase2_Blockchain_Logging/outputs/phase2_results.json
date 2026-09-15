@@ -1,0 +1,95 @@
+{
+  "generated_at": "2026-09-15T18:02:28.496Z",
+  "num_events_processed": 2000,
+  "inference_source": "simulated",
+  "benchmark": {
+    "events_processed": 500,
+    "elapsed_sec": 4.191664267000306,
+    "measured_throughput_eps": 119.2843625231027,
+    "latency_ms_p50": 7.761411500268878,
+    "latency_ms_p95": 11.379436150355097,
+    "latency_ms_p99": 17.144403440015587,
+    "latency_ms_max": 29.225251999378088
+  },
+  "required_tx_per_sec_calc": {
+    "peak_events_per_sec": 10000,
+    "anchoring_rate": 0.1143,
+    "unbatched_tx_per_sec": 1143.0,
+    "batch_factor_100_tx_per_sec": 11.43,
+    "min_batch_factor_for_1000_tps": 2
+  },
+  "storage": {
+    "sample_size": 200,
+    "on_chain_bytes_mean": 762.46,
+    "on_chain_bytes_max": 773,
+    "off_chain_bytes_mean": 1391.94,
+    "reduction_pct": 45.22321364426628
+  },
+  "integrity": {
+    "audited_count": 300,
+    "verified_count": 300,
+    "failure_rate_pct": 0.0,
+    "tamper_injection_detected": true
+  },
+  "icr_sweep": [
+    {
+      "gate": 0.0,
+      "integrity_coverage_ratio": 1.0,
+      "on_chain_volume": 1.0,
+      "attack_count": 1949
+    },
+    {
+      "gate": 0.5,
+      "integrity_coverage_ratio": 0.9943560800410467,
+      "on_chain_volume": 0.9945,
+      "attack_count": 1949
+    },
+    {
+      "gate": 0.75,
+      "integrity_coverage_ratio": 0.9897383273473577,
+      "on_chain_volume": 0.99,
+      "attack_count": 1949
+    },
+    {
+      "gate": 0.9,
+      "integrity_coverage_ratio": 0.9897383273473577,
+      "on_chain_volume": 0.982,
+      "attack_count": 1949
+    },
+    {
+      "gate": 0.95,
+      "integrity_coverage_ratio": 0.9897383273473577,
+      "on_chain_volume": 0.973,
+      "attack_count": 1949
+    },
+    {
+      "gate": 0.99,
+      "integrity_coverage_ratio": 0.1780400205233453,
+      "on_chain_volume": 0.175,
+      "attack_count": 1949
+    }
+  ],
+  "icr_at_gate": {
+    "gate": 0.95,
+    "integrity_coverage_ratio": 0.9897383273473577,
+    "on_chain_volume": 0.973,
+    "attack_count": 1949
+  },
+  "digest_agreement": {
+    "python_vectors_total": 6,
+    "python_vectors_matched": 6,
+    "python_agreement_pct": 100.0,
+    "go_implementation_present": true,
+    "go_independently_executed": false
+  },
+  "model_provenance": {
+    "anchored": true,
+    "model_digest": "8e985a7cf2272c54b331ea176c3a8918edfb0e618093902b55503457c9fbd3de",
+    "traceable": true
+  },
+  "non_repudiation": {
+    "signature_pass": 300,
+    "signature_checks": 300,
+    "forged_signature_rejected": true
+  }
+}

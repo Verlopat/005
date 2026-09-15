@@ -3,6 +3,11 @@
 network-artifacts/
 wallet/
 
+# Scratch content-addressed store written by scripts/generate_phase2_results.py.
+# The generated report/JSON themselves (outputs/phase2_results.md, .json) ARE
+# committed on purpose so the paper can cite a stable, checked-in results file.
+outputs/_run_evidence/
+
 # Python
 __pycache__/
 *.py[cod]
