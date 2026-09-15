@@ -2,7 +2,7 @@
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "$id": "https://verlopat.example/contracts/stahn-alert-event-1.0.0.json",
   "title": "STAHN Security Alert Event",
-  "description": "Frozen cross-layer alert contract for Phase 1 detection and Phase 2 evidence logging.",
+  "description": "Frozen cross-layer alert contract for Phase 1 detection and Phase 2 evidence logging. Every field listed here corresponds to a field named in Research Objective 2 ('the interface between the two layers is a frozen alert contract'). Field order below is normative for canonical serialisation; see docs/canonicalisation_spec.md.",
   "type": "object",
   "additionalProperties": false,
   "required": [
@@ -19,6 +19,137 @@
     "triggering_features",
     "model",
     "feature_attributions",
+    "payload_digest",
     "inference_latency_ms"
   ],
-  
+  "properties": {
+    "contract_version": {
+      "type": "string",
+      "const": "1.0.0",
+      "description": "Version of this frozen alert contract. A consumer must reject any event whose contract_version it does not recognise rather than guess at field semantics."
+    },
+    "event_id": {
+      "type": "string",
+      "format": "uuid",
+      "description": "Globally unique identifier for this detection event, assigned once by the detection agent at emission time and never reused."
+    },
+    "timestamp": {
+      "type": "string",
+      "format": "date-time",
+      "description": "RFC 3339 UTC timestamp of the detection event, e.g. 2026-09-15T18:04:12.501Z."
+    },
+    "verdict": {
+      "type": "string",
+      "enum": ["ATTACK", "BENIGN"],
+      "description": "Binary classification verdict emitted by the detection layer."
+    },
+    "threat_category": {
+      "type": "string",
+      "enum": [
+        "BENIGN",
+        "DoS",
+        "DDoS",
+        "Mirai",
+        "Recon",
+        "Spoofing",
+        "Web-based",
+        "BruteForce",
+        "Infiltration",
+        "Botnet",
+        "Exploits",
+        "Other"
+      ],
+      "description": "Coarse threat category. Objective 1 defines seven coarse categories collapsed from fifteen fine-grained labels on NF-CSE-CIC-IDS2018-v2; this contract additionally admits the CICIoT2023 coarse families actually emitted by the deployed Phase 1 STAHN artifact so the schema is truthful about both the registered detection layer and the delivered one. 'Other' is used only when the emitting model cannot resolve a finer category (e.g. a binary-only classifier)."
+    },
+    "severity": {
+      "type": "string",
+      "enum": ["critical", "high", "medium", "low", "informational"],
+      "description": "Operational severity derived from threat_category and calibrated_confidence by the anchoring policy (config/anchoring-policy.example.yaml)."
+    },
+    "calibrated_confidence": {
+      "type": "number",
+      "minimum": 0.0,
+      "maximum": 1.0,
+      "description": "Calibrated confidence score in [0,1]. Objective 1 fits isotonic calibration on the validation fold before this score is produced; the anchoring gate of Objective 3 is only defensible against a calibrated score. This contract carries a `calibration` sub-object (see below) so a downstream auditor can tell a calibrated score from a raw, uncalibrated model output."
+    },
+    "calibration": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["is_calibrated", "method"],
+      "properties": {
+        "is_calibrated": {
+          "type": "boolean",
+          "description": "False when the emitting detection layer has not fitted a calibrator (e.g. the delivered Phase 1 STAHN artifact, which reports raw softmax output). The anchoring policy must widen its safety margin when this is false."
+        },
+        "method": {
+          "type": "string",
+          "enum": ["isotonic", "platt", "none"],
+          "description": "Calibration method applied, or 'none' if calibrated_confidence is a raw model score."
+        }
+      }
+    },
+    "source_address": {
+      "type": ["string", "null"],
+      "description": "Source IP:port, carried as nullable alert metadata only. Objective 1 deliberately excludes identifiers from the feature space; they travel here so an analyst can act on an alert without the model having trained on them."
+    },
+    "destination_address": {
+      "type": ["string", "null"],
+      "description": "Destination IP:port, carried as nullable alert metadata only, for the same reason as source_address."
+    },
+    "resource_id": {
+      "type": "string",
+      "description": "Derived cloud resource identifier (e.g. instance ID, container ID, or interface ID) that observed the flow."
+    },
+    "triggering_features": {
+      "type": "object",
+      "description": "The feature vector consumed by the model for this flow, keyed by feature name. Carried so an auditor can recompute the verdict independently of the live model service.",
+      "minProperties": 1,
+      "additionalProperties": {
+        "type": "number"
+      }
+    },
+    "model": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["model_id", "model_digest", "version_label"],
+      "properties": {
+        "model_id": {
+          "type": "string",
+          "description": "Stable logical identifier for the deployed model family, e.g. 'stahn-phase1'."
+        },
+        "model_digest": {
+          "type": "string",
+          "pattern": "^[0-9a-f]{64}$",
+          "description": "SHA-256 digest computed over every prediction-affecting component of the deployed artifact (serialised model, feature ordering, label ordering, hyperparameters, thresholds). See src/model_provenance.py. This digest is anchored on-chain once per retraining cycle (contracts/model_provenance.schema.json) and referenced by every alert produced under that model."
+        },
+        "version_label": {
+          "type": "string",
+          "description": "Human-readable version label, e.g. 'stahn_v1_98.62_acc'."
+        }
+      }
+    },
+    "feature_attributions": {
+      "type": "array",
+      "description": "Ranked per-feature attributions for this verdict (e.g. SHAP values), most influential first. May be empty for a model family that does not yet supply attributions.",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["feature", "contribution"],
+        "properties": {
+          "feature": {"type": "string"},
+          "contribution": {"type": "number"}
+        }
+      }
+    },
+    "payload_digest": {
+      "type": "string",
+      "pattern": "^[0-9a-f]{64}$",
+      "description": "SHA-256 digest of this event's canonical serialisation (docs/canonicalisation_spec.md), computed over every field except payload_digest itself. This is the value committed to the ledger and independently recomputed by an auditor."
+    },
+    "inference_latency_ms": {
+      "type": "number",
+      "minimum": 0,
+      "description": "Measured wall-clock inference latency in milliseconds for this single flow."
+    }
+  }
+}

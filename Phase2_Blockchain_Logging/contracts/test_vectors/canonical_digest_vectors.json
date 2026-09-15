@@ -1,0 +1,114 @@
+{
+  "spec_version": "1.0.0",
+  "vectors": [
+    {
+      "name": "minimal_two_keys",
+      "description": "Basic key-ordering check: keys must sort b before a is wrong; a before b is right.",
+      "input": {
+        "b": 2,
+        "a": 1
+      },
+      "expected_canonical": "{\"a\":1,\"b\":2}",
+      "expected_sha256": "43258cff783fe7036d8a43033f830adfc60ec037382473548ac742b888292777"
+    },
+    {
+      "name": "nested_and_null",
+      "description": "Nested object with null-valued nullable field and negative integer.",
+      "input": {
+        "z": null,
+        "a": {
+          "y": 1,
+          "x": -7
+        },
+        "m": [
+          3,
+          1,
+          2
+        ]
+      },
+      "expected_canonical": "{\"a\":{\"x\":-7,\"y\":1},\"m\":[3,1,2],\"z\":null}",
+      "expected_sha256": "9abfe483ebecd84f850c4d15a994fdb20c92613c0bbeb6a43c9647b6b21ee1d6"
+    },
+    {
+      "name": "float_rendering",
+      "description": "Non-integer float and integral float must render with round-trip-shortest form.",
+      "input": {
+        "conf": 0.9975,
+        "whole": 2.0,
+        "neg": -0.5,
+        "tiny": 1e-06
+      },
+      "expected_canonical": "{\"conf\":0.9975,\"neg\":-0.5,\"tiny\":1e-06,\"whole\":2.0}",
+      "expected_sha256": "e67b5dd5a34ea8176941d1cc3f9c88264f8b316f3884b4dba5f0bb825b4e3de4"
+    },
+    {
+      "name": "string_escaping",
+      "description": "Control characters, quotes and backslash must escape; unicode and slash must not.",
+      "input": {
+        "note": "line1\nline2\ttabbed \"quoted\" back\\slash /slash/ café"
+      },
+      "expected_canonical": "{\"note\":\"line1\\nline2\\ttabbed \\\"quoted\\\" back\\\\slash /slash/ café\"}",
+      "expected_sha256": "083223d57e4f74bc9795bdf979d5bbc7ec9757e4345dc7f28c3a36e9dc74a977"
+    },
+    {
+      "name": "feature_attribution_array_order_preserved",
+      "description": "Array order (rank order) must be preserved, never re-sorted.",
+      "input": {
+        "feature_attributions": [
+          {
+            "feature": "Rate",
+            "contribution": 0.41
+          },
+          {
+            "feature": "Header_Length",
+            "contribution": 0.22
+          },
+          {
+            "feature": "Tot_size",
+            "contribution": -0.05
+          }
+        ]
+      },
+      "expected_canonical": "{\"feature_attributions\":[{\"contribution\":0.41,\"feature\":\"Rate\"},{\"contribution\":0.22,\"feature\":\"Header_Length\"},{\"contribution\":-0.05,\"feature\":\"Tot_size\"}]}",
+      "expected_sha256": "4198682780ac952c35c36348cd7bb547348421d869ee0b69bab7a5d6a1294308"
+    },
+    {
+      "name": "realistic_alert_event_v1",
+      "description": "A full alert event shaped exactly like contracts/alert_event.schema.json minus payload_digest.",
+      "input": {
+        "contract_version": "1.0.0",
+        "event_id": "5f2c9b3e-7d0a-4a41-9c2a-1b6a2e7d5f00",
+        "timestamp": "2026-09-15T18:04:12.501Z",
+        "verdict": "ATTACK",
+        "threat_category": "DDoS",
+        "severity": "high",
+        "calibrated_confidence": 0.9931,
+        "calibration": {
+          "is_calibrated": false,
+          "method": "none"
+        },
+        "source_address": null,
+        "destination_address": null,
+        "resource_id": "i-0abc123def4567890",
+        "triggering_features": {
+          "Rate": 16251.95,
+          "Protocol Type": 6.0
+        },
+        "model": {
+          "model_id": "stahn-phase1",
+          "model_digest": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+          "version_label": "stahn_v1_98.62_acc"
+        },
+        "feature_attributions": [
+          {
+            "feature": "Rate",
+            "contribution": 0.41
+          }
+        ],
+        "inference_latency_ms": 0.31
+      },
+      "expected_canonical": "{\"calibrated_confidence\":0.9931,\"calibration\":{\"is_calibrated\":false,\"method\":\"none\"},\"contract_version\":\"1.0.0\",\"destination_address\":null,\"event_id\":\"5f2c9b3e-7d0a-4a41-9c2a-1b6a2e7d5f00\",\"feature_attributions\":[{\"contribution\":0.41,\"feature\":\"Rate\"}],\"inference_latency_ms\":0.31,\"model\":{\"model_digest\":\"aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa\",\"model_id\":\"stahn-phase1\",\"version_label\":\"stahn_v1_98.62_acc\"},\"resource_id\":\"i-0abc123def4567890\",\"severity\":\"high\",\"source_address\":null,\"threat_category\":\"DDoS\",\"timestamp\":\"2026-09-15T18:04:12.501Z\",\"triggering_features\":{\"Protocol Type\":6.0,\"Rate\":16251.95},\"verdict\":\"ATTACK\"}",
+      "expected_sha256": "8641677b99492dd9bccf5bc380e28982c959c5be35e1014462dc42fbfd7b25f7"
+    }
+  ]
+}

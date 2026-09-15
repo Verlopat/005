@@ -1,0 +1,69 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://verlopat.example/contracts/stahn-model-provenance-1.0.0.json",
+  "title": "STAHN Model Provenance Record",
+  "description": "Anchored once per retraining cycle. Establishes the 'immutable birth certificate' directed by the Phase 1 handoff document: an auditor who holds an alert's model.model_digest can look up exactly which artifact produced it and when that artifact entered service.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "contract_version",
+    "model_id",
+    "model_digest",
+    "version_label",
+    "artifact_content_address",
+    "feature_order",
+    "label_order",
+    "hyperparameters",
+    "thresholds",
+    "training_summary",
+    "anchored_at"
+  ],
+  "properties": {
+    "contract_version": {"type": "string", "const": "1.0.0"},
+    "model_id": {"type": "string", "description": "Stable logical identifier for the deployed model family, e.g. 'stahn-phase1'."},
+    "model_digest": {
+      "type": "string",
+      "pattern": "^[0-9a-f]{64}$",
+      "description": "SHA-256 digest computed over the serialised model plus every other prediction-affecting component: feature_order, label_order, hyperparameters, thresholds. Recomputing this digest from the listed components and the artifact bytes must reproduce this exact value; see src/model_provenance.py:compute_model_digest."
+    },
+    "version_label": {"type": "string"},
+    "artifact_content_address": {
+      "type": "string",
+      "description": "Content address (e.g. sha256:<digest> local content-addressed store key, or an IPFS CID) of the full serialised model artifact, per the hybrid on-chain/off-chain storage architecture of Objective 2. Only this address and model_digest are anchored on-chain; the multi-megabyte artifact itself is never committed."
+    },
+    "feature_order": {
+      "type": "array",
+      "items": {"type": "string"},
+      "minItems": 1,
+      "description": "Ordered feature names as consumed by the model. Part of the digest because reordering features silently changes predictions without changing the model file."
+    },
+    "label_order": {
+      "type": "array",
+      "items": {"type": "string"},
+      "minItems": 1
+    },
+    "hyperparameters": {
+      "type": "object",
+      "description": "Frozen hyperparameters of the deployed configuration."
+    },
+    "thresholds": {
+      "type": "object",
+      "description": "Per-class decision thresholds in effect for this artifact, if applicable. Empty object permitted for a model family that has not yet adopted per-class thresholds."
+    },
+    "training_summary": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["dataset", "record_count", "reported_metrics"],
+      "properties": {
+        "dataset": {"type": "string"},
+        "record_count": {"type": "integer", "minimum": 0},
+        "reported_metrics": {"type": "object"}
+      }
+    },
+    "anchored_at": {
+      "type": "string",
+      "format": "date-time",
+      "description": "RFC 3339 UTC timestamp at which this provenance record was anchored on-chain."
+    }
+  }
+}
