@@ -32,9 +32,9 @@ def venv_python() -> Path:
     return VENV_DIR / ("Scripts/python.exe" if os.name == "nt" else "bin/python")
 
 
-def run(command: list[str]) -> None:
+def run(command: list[str], *, cwd: Path | None = None) -> None:
     print("+", " ".join(map(str, command)))
-    subprocess.run(command, check=True)
+    subprocess.run(command, check=True, cwd=cwd)
 
 
 def ensure_venv() -> Path:
@@ -59,7 +59,7 @@ def launch(phase: str) -> None:
     entry_point = config["command"][0]
     if not entry_point.is_file():
         raise FileNotFoundError(f"Entry point not found: {entry_point}")
-    run([str(python), *map(str, config["command"])])
+    run([str(python), *map(str, config["command"])], cwd=entry_point.parent)
 
 
 def main() -> None:
