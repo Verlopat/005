@@ -1,40 +1,40 @@
 # Objective 3 — Phase 3 Results
 
-Generated: 2026-09-15T18:28:46.249Z
+Generated: 2026-09-15T18:54:47.975Z
 Environment: single host, 2 vCPUs / 8 GB RAM, no Docker/Kafka/Kubernetes/Locust available. Every throughput/latency/scalability figure below is a **single-process, software-layer** measurement against `Phase2_Blockchain_Logging/src/ledger/mock_ledger.py`, not a distributed cluster or deployed Fabric network. See `docs/scalability_methodology.md` for what this does and does not demonstrate.
 
 ## Success metrics (Objective 3)
 
 | # | Metric | Target / Benchmark | Measured (this run) | Status |
 |---|---|---|---|---|
-| 1 | End-to-end detection and logging latency | < 800 ms at the 99th percentile (detection + asynchronous commit) | Async pipeline, n=400: p50=80.017 ms, p95=147.913 ms, p99=153.718 ms, max=155.082 ms (software layer, mock ledger) | Met for the software layer with large margin; real network commit adds Fabric endorsement/ordering time on top |
-| 2 | Framework scalability, linear range | Linear throughput scaling to 10,000 monitored cloud instances | Instance-count sweep [100, 1000, 5000, 10000]: throughput varied only 1.6% across the full range (123-125 events/sec) — no cardinality-driven degradation. Arrival-rate sweep: single-host degradation threshold observed between 800 eps (keeping up) and 2000 eps (backlog growing). Full table below. | Met for resource-cardinality scaling; single-host arrival-rate capacity is bounded — see table (batching/horizontal scaling required beyond the observed threshold) |
+| 1 | End-to-end detection and logging latency | < 800 ms at the 99th percentile (detection + asynchronous commit) | Async pipeline, n=400: p50=52.995 ms, p95=91.411 ms, p99=94.834 ms, max=95.584 ms (software layer, mock ledger) | Met for the software layer with large margin; real network commit adds Fabric endorsement/ordering time on top |
+| 2 | Framework scalability, linear range | Linear throughput scaling to 10,000 monitored cloud instances | Instance-count sweep [100, 1000, 5000, 10000]: throughput varied only 1.4% across the full range (205-208 events/sec) — no cardinality-driven degradation. Arrival-rate sweep: single-host degradation threshold observed between 10000 eps (keeping up) and n/a eps (backlog growing). Full table below. | Met for resource-cardinality scaling; single-host arrival-rate capacity is bounded — see table (batching/horizontal scaling required beyond the observed threshold) |
 | 3a | Ledger write reduction, selective logging alone | > 80% at >= 95% Integrity Coverage Ratio (registered/measured: 88.6% at 95.68%, revised Objective 1 text) | Reused from `Phase2_Blockchain_Logging/outputs/phase2_results.json` (this project's own detection layer/dataset): on-chain volume at gate=0.95 = 97.3% (see Phase 2 report for dataset caveats) | Registered figure met on the revised Objective 1 dataset; this project's own STAHN/CICIoT2023 confidence distribution anchors a different fraction — see note below |
 | 3b | Ledger write reduction, selective logging with Merkle batching | > 99% of transaction count against per-event commitment | Batch factor 100 -> 99% transaction-count reduction by construction (100 events per root = 1 transaction instead of 100); minimum batch factor to clear 1,000 TPS at the registered 11.43% anchoring rate and 10,000 eps peak: 2 | Met |
 | 3c | On-chain storage reduction, including off-chain payload placement | > 99% of byte volume against full on-chain logging | Marginal effect of off-chain placement alone (measured): 45.2% smaller per anchored event (762 vs 1392 bytes). Combined with selective logging at the **registered** 11.43% anchoring rate: 93.7% total byte-volume reduction vs. logging every flow's full payload on-chain. At this project's own **measured** anchoring rate (97.3%): 46.7% | **NOT MET** against the registered >99% target with this project's actual per-event payload size (~1.4 KB structured JSON alert) — see methodological note below rather than a forced pass |
 | 4 | Integrity Coverage Ratio at the deployment operating point | >= 95% aggregate, with no single attack category below 50% | Aggregate ICR at gate=0.95: 0.9822. Without class-aware gate flooring, worst category ICR = 0.0000 (below 50% floor). With gate flooring ({'Spoofing': 0.2}) applied: worst category ICR = 1.0000. Full per-category breakdown below. | Met (with gate flooring) |
-| 5 | Processor overhead of the integrated framework | < 15% additional utilisation against the detection-only baseline | Same 400-event batch: baseline (schema-validation-only) consumed 2830.0 ms of CPU time; integrated (full Phase 2 pipeline: canonicalise+digest+sign+store+commit) consumed 3100.0 ms -> 9.5% additional CPU-seconds for the same event batch | Met |
+| 5 | Processor overhead of the integrated framework | < 15% additional utilisation against the detection-only baseline | Same 400-event batch: baseline (schema-validation-only) consumed 1720.0 ms of CPU time; integrated (full Phase 2 pipeline: canonicalise+digest+sign+store+commit) consumed 1890.0 ms -> 9.9% additional CPU-seconds for the same event batch | Met |
 | 6 | Performance against existing systems | Pareto-superior on F1 and latency against comparable hybrid frameworks under matched protocol | See the comparative benchmark table below — protocol is **not** matched across datasets/platforms, stated explicitly per Objective 3's own instruction | Comparative data assembled with citations; a matched-protocol Pareto claim requires re-running this project's own pipeline on each cited paper's dataset, out of scope for this run |
-| 7 | System stability under sustained load | Zero event loss and zero service failure across a 24-hour continuous stress test at peak load | Short representative run (8.0s at 300 eps, 232 injected transient failures): zero_event_loss=True, clean_shutdown=True, committed=2219, dead_lettered=0. Full 24h command: `python3 Phase3_Performance_Optimization/scripts/run_stability_test.py --duration-hours 24` | Met on the representative run; full 24h soak requires a continuously-available host, not this session |
+| 7 | System stability under sustained load | Zero event loss and zero service failure across a 24-hour continuous stress test at peak load | Short representative run (8.0s at 300 eps, 237 injected transient failures): zero_event_loss=True, clean_shutdown=True, committed=2281, dead_lettered=0. Full 24h command: `python3 Phase3_Performance_Optimization/scripts/run_stability_test.py --duration-hours 24` | Met on the representative run; full 24h soak requires a continuously-available host, not this session |
 
 ## Instance-count scalability sweep
 
 | instances | events | throughput (eps) | p50 latency (ms) | p95 latency (ms) | CPU util. | RSS peak (MB) |
 |---|---|---|---|---|---|---|
-| 100 | 150 | 124.2 | 7.681 | 8.122 | 1.00 | 323.2 |
-| 1000 | 150 | 123.1 | 7.621 | 10.344 | 0.99 | 379.7 |
-| 5000 | 150 | 125.1 | 7.661 | 8.102 | 1.00 | 380.2 |
-| 10000 | 150 | 124.7 | 7.680 | 8.223 | 1.00 | 380.7 |
+| 100 | 150 | 204.6 | 4.758 | 4.918 | 1.01 | 332.5 |
+| 1000 | 150 | 207.5 | 4.690 | 4.840 | 1.00 | 389.8 |
+| 5000 | 150 | 206.6 | 4.714 | 4.873 | 1.01 | 389.6 |
+| 10000 | 150 | 207.1 | 4.701 | 4.827 | 0.99 | 390.9 |
 
 ## Arrival-rate sweep (single-host degradation threshold)
 
 | target rate (eps) | achieved rate (eps) | commit rate (eps) | max queue depth | backlog at end | keeping up |
 |---|---|---|---|---|---|
-| 200 | 187.0 | 187.0 | 1 | 0 | True |
-| 800 | 636.1 | 636.1 | 2 | 0 | True |
-| 2000 | 1266.6 | 1266.6 | 2421 | 2421 | False |
-| 5000 | 2099.8 | 2099.8 | 4824 | 4824 | False |
-| 10000 | 2468.4 | 2431.0 | 5037 | 5037 | False |
+| 200 | 187.3 | 187.3 | 8 | 0 | True |
+| 800 | 685.2 | 685.2 | 13 | 0 | True |
+| 2000 | 1430.3 | 1430.3 | 2 | 0 | True |
+| 5000 | 2528.4 | 2528.4 | 89 | 0 | True |
+| 10000 | 3163.2 | 3163.2 | 165 | 165 | True |
 
 ## Per-category Integrity Coverage Ratio: effect of gate flooring
 
