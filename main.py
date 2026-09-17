@@ -121,11 +121,36 @@ def preflight(args) -> list[Path]:
     missing = [str(p) for p in required if not p.is_file()]
     if missing:
         raise FileNotFoundError(
-            "Missing prerequisites:\n  " + "\n  ".join(missing)
-            + "\nSupply the Phase_1 dataset and run --mode train, restore the exported "
-              "bundle/alerts for --mode existing, or use --mode smoke for synthetic testing."
+            "Missing prerequisites:\n  " + "\n  ".join(missing) + "\n" + remedy(missing)
         )
     return required
+
+
+def remedy(missing: list[str]) -> str:
+    """Advice naming only the recovery steps the missing files actually imply.
+
+    A single absent alert stream used to print the full three-mode recovery
+    blurb, which reads as "retrain the detector" when the trained bundle is
+    present and healthy.
+    """
+    hints = []
+    if any("run_stage.py" in item for item in missing):
+        hints.append("pipeline/run_stage.py is absent; the checkout is incomplete.")
+    if any(item.endswith(".csv") for item in missing):
+        hints.append("Restore the Phase_1 dataset CSV into Phase_1/data/.")
+    if any("detector_bundle" in item or "model_card" in item for item in missing):
+        hints.append("Restore the exported Phase_1 model bundle, or rebuild it with "
+                     "--mode train.")
+    if any("sample_alerts" in item for item in missing):
+        hints.append("Export the alert stream with Phase_1/10_alert_contract.py (it "
+                     "reuses the trained bundle and does not retrain), or pass --alerts "
+                     "to point at an existing stream.")
+    if any("phase2" in item for item in missing):
+        hints.append("--only phase3 replays a finished phase2; check --run-dir names a "
+                     "run that completed phase2.")
+    if not hints:
+        hints.append("Use --mode smoke to exercise the pipeline on synthetic data.")
+    return "\n".join(hints)
 
 
 def commands(args, python: str) -> list[tuple[str, list[str], Path]]:
