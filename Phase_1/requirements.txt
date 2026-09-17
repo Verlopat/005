@@ -9,3 +9,6 @@ optuna
 shap
 fastapi
 uvicorn
+xgboost
+catboost
+imbalanced-learn

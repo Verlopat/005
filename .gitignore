@@ -10,6 +10,9 @@ __pycache__/
 .pytest_cache/
 .mypy_cache/
 .ruff_cache/
+runs/
+.phase2_runtime/
+.phase3_runtime/
 
 # Packaging and coverage
 build/

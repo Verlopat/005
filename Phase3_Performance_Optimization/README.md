@@ -1,5 +1,16 @@
 # Phase 3 — Performance Optimisation, Scalability Validation, and Comparative Benchmarking
 
+## Current integrated entry point
+
+Use `python main.py phase3 --mode existing --run-dir runs/experiment-a`
+after completing Phase 2 in that directory. The current experiment replays the
+validated Phase 2 events in paired synchronous/asynchronous MockLedger trials.
+See the root README for metrics, limitations, and the complete three-phase command.
+
+The STAHN/CICIoT2023 load generator, retired root scripts, and historical paper
+results described below are not the new integrated execution path. Their legacy
+load/stability tests require a separate dataset migration.
+
 Phase 3 implements **Objective 3**: the holistic optimisation and
 validation of the integrated framework (Phase 1 detection + Phase 2
 blockchain evidence logging) against the performance requirements of a

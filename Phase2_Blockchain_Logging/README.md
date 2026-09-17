@@ -1,5 +1,15 @@
 # Phase 2 — Blockchain-Based Tamper-Proof Security Event Logging
 
+## Current integrated entry point
+
+Use `python main.py phase2 --mode existing --install --run-dir runs/experiment-a`
+from the repository root for the current `Phase_1` exports. Use `--mode smoke`
+for a clearly synthetic test without trained artifacts. See the root README
+for the validated adapter and run-manifest format.
+
+The older STAHN/CICIoT2023 demos and paper reports described below are historical
+and are not the current integrated launcher's execution path.
+
 Phase 2 establishes the integrity and provenance layer for the STAHN
 intrusion-detection system in `../Phase1_Submission`, implementing
 **Objective 2** of the project (see `Research_Objectives_Revised.docx`).
