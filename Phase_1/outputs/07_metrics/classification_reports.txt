@@ -1,0 +1,607 @@
+
+==============================================================================
+balanced_rf
+==============================================================================
+              precision    recall  f1-score   support
+
+      Benign     0.9990    0.5783    0.7325   3327227
+        DDoS     0.9965    0.6883    0.8142    278227
+         DoS     0.9959    0.9999    0.9979     96798
+         Bot     0.9996    0.9998    0.9997     28532
+  BruteForce     0.9971    0.9998    0.9984     23967
+Infiltration     0.0150    0.9180    0.0295     23215
+ Web Attacks     0.0045    0.5910    0.0089       665
+
+    accuracy                         0.6051   3778631
+   macro avg     0.7154    0.8250    0.6545   3778631
+weighted avg     0.9925    0.6051    0.7446   3778631
+
+Confusion matrix (rows = true, cols = predicted)
+               Benign    DDoS    DoS    Bot  BruteForce  Infiltration  Web Attacks
+Benign        1924006     399    393      9          70       1402126          224
+DDoS                0  191503      0      0           0             0        86724
+DoS                11       0  96786      0           0             1            0
+Bot                 6       0      0  28526           0             0            0
+BruteForce          0       0      4      0       23962             1            0
+Infiltration     1888       0      0      1           0         21311           15
+Web Attacks         0     272      0      0           0             0          393
+
+Per-class detail
+       class  support  precision  recall_DR     f1  TNR_specificity  binary_recall  ROC_AUC_ovr
+      Benign  3327227     0.9990     0.5783 0.7325           0.9958            NaN       0.9921
+        DDoS   278227     0.9965     0.6883 0.8142           0.9998         1.0000       0.4902
+         DoS    96798     0.9959     0.9999 0.9979           0.9999         0.9999       0.4945
+         Bot    28532     0.9996     0.9998 0.9997           1.0000         0.9998       0.4518
+  BruteForce    23967     0.9971     0.9998 0.9984           1.0000         1.0000       0.4721
+Infiltration    23215     0.0150     0.9180 0.0295           0.6266         0.9187       0.8641
+ Web Attacks      665     0.0045     0.5910 0.0089           0.9770         1.0000       0.9805
+
+
+==============================================================================
+cascade
+==============================================================================
+              precision    recall  f1-score   support
+
+      Benign     0.9951    0.9997    0.9974   3327227
+        DDoS     0.9985    0.6897    0.8158    278227
+         DoS     0.9999    1.0000    1.0000     96798
+         Bot     0.9999    1.0000    1.0000     28532
+  BruteForce     0.9994    1.0000    0.9997     23967
+Infiltration     0.8662    0.2993    0.4449     23215
+ Web Attacks     0.0044    0.5789    0.0088       665
+
+    accuracy                         0.9725   3778631
+   macro avg     0.8377    0.7954    0.7524   3778631
+weighted avg     0.9946    0.9725    0.9806   3778631
+
+Confusion matrix (rows = true, cols = predicted)
+               Benign    DDoS    DoS    Bot  BruteForce  Infiltration  Web Attacks
+Benign        3326069      17      8      2          14          1071           46
+DDoS                0  191890      0      0           0             0        86337
+DoS                 0       0  96798      0           0             0            0
+Bot                 0       0      0  28532           0             0            0
+BruteForce          0       0      0      0       23967             0            0
+Infiltration    16264       0      0      0           0          6948            3
+Web Attacks         6     272      0      0           0             2          385
+
+Per-class detail
+       class  support  precision  recall_DR     f1  TNR_specificity  binary_recall  ROC_AUC_ovr
+      Benign  3327227     0.9951     0.9997 0.9974           0.9640            NaN       0.9919
+        DDoS   278227     0.9985     0.6897 0.8158           0.9999         1.0000       0.9999
+         DoS    96798     0.9999     1.0000 1.0000           1.0000         1.0000       1.0000
+         Bot    28532     0.9999     1.0000 1.0000           1.0000         1.0000       1.0000
+  BruteForce    23967     0.9994     1.0000 0.9997           1.0000         1.0000       1.0000
+Infiltration    23215     0.8662     0.2993 0.4449           0.9997         0.2994       0.8610
+ Web Attacks      665     0.0044     0.5789 0.0088           0.9771         0.9910       0.9802
+
+
+==============================================================================
+cascade_unweighted
+==============================================================================
+              precision    recall  f1-score   support
+
+      Benign     0.9952    0.9995    0.9973   3327227
+        DDoS     0.9731    0.8947    0.9323    278227
+         DoS     0.9350    0.8186    0.8729     96798
+         Bot     0.0943    0.0530    0.0679     28532
+  BruteForce     0.7305    0.8603    0.7901     23967
+Infiltration     0.3343    0.2162    0.2626     23215
+ Web Attacks     0.0006    0.0346    0.0012       665
+
+    accuracy                         0.9741   3778631
+   macro avg     0.5804    0.5539    0.5606   3778631
+weighted avg     0.9793    0.9741    0.9763   3778631
+
+Confusion matrix (rows = true, cols = predicted)
+               Benign    DDoS    DoS    Bot  BruteForce  Infiltration  Web Attacks
+Benign        3325548     541    174     54         292           498          120
+DDoS                0  248938   3865  10009        2620          5158         7637
+DoS                 0    4239  79239   4437        3849          3898         1136
+Bot                 0     493      0   1513          56             0        26470
+BruteForce          0       5   1373      0       20619           426         1544
+Infiltration    16181    1030     76     11         782          5020          115
+Web Attacks         5     571     22     23           6            15           23
+
+Per-class detail
+       class  support  precision  recall_DR     f1  TNR_specificity  binary_recall  ROC_AUC_ovr
+      Benign  3327227     0.9952     0.9995 0.9973           0.9641            NaN       0.9919
+        DDoS   278227     0.9731     0.8947 0.9323           0.9980         1.0000       0.9374
+         DoS    96798     0.9350     0.8186 0.8729           0.9985         1.0000       0.9071
+         Bot    28532     0.0943     0.0530 0.0679           0.9961         1.0000       0.5239
+  BruteForce    23967     0.7305     0.8603 0.7901           0.9980         1.0000       0.9150
+Infiltration    23215     0.3343     0.2162 0.2626           0.9973         0.3030       0.7179
+ Web Attacks      665     0.0006     0.0346 0.0012           0.9902         0.9925       0.5613
+
+
+==============================================================================
+catboost
+==============================================================================
+              precision    recall  f1-score   support
+
+      Benign     0.9992    0.5316    0.6940   3327227
+        DDoS     0.9942    0.6436    0.7814    278227
+         DoS     0.9962    0.9999    0.9981     96798
+         Bot     0.9942    0.9998    0.9970     28532
+  BruteForce     0.9965    1.0000    0.9983     23967
+Infiltration     0.0138    0.9394    0.0272     23215
+ Web Attacks     0.0042    0.6376    0.0084       665
+
+    accuracy                         0.5609   3778631
+   macro avg     0.7141    0.8217    0.6435   3778631
+weighted avg     0.9925    0.5609    0.7082   3778631
+
+Confusion matrix (rows = true, cols = predicted)
+               Benign    DDoS    DoS    Bot  BruteForce  Infiltration  Web Attacks
+Benign        1768743     800    368    167          83       1556024         1042
+DDoS               13  179069      0      0           0             3        99142
+DoS                 6       0  96791      0           0             1            0
+Bot                 3       0      0  28527           0             2            0
+BruteForce          0       0      0      0       23967             0            0
+Infiltration     1390       1      0      0           0         21809           15
+Web Attacks         0     241      0      0           0             0          424
+
+Per-class detail
+       class  support  precision  recall_DR     f1  TNR_specificity  binary_recall  ROC_AUC_ovr
+      Benign  3327227     0.9992     0.5316 0.6940           0.9969            NaN       0.9910
+        DDoS   278227     0.9942     0.6436 0.7814           0.9997         1.0000       0.4278
+         DoS    96798     0.9962     0.9999 0.9981           0.9999         0.9999       0.3720
+         Bot    28532     0.9942     0.9998 0.9970           1.0000         0.9999       0.0590
+  BruteForce    23967     0.9965     1.0000 0.9983           1.0000         1.0000       0.6604
+Infiltration    23215     0.0138     0.9394 0.0272           0.5857         0.9401       0.8463
+ Web Attacks      665     0.0042     0.6376 0.0084           0.9735         1.0000       0.9800
+
+
+==============================================================================
+extratrees
+==============================================================================
+              precision    recall  f1-score   support
+
+      Benign     0.9988    0.5791    0.7331   3327227
+        DDoS     0.9992    0.4248    0.5961    278227
+         DoS     0.9999    1.0000    1.0000     96798
+         Bot     1.0000    1.0000    1.0000     28532
+  BruteForce     0.9999    0.9999    0.9999     23967
+Infiltration     0.0147    0.8979    0.0289     23215
+ Web Attacks     0.0038    0.9203    0.0076       665
+
+    accuracy                         0.5864   3778631
+   macro avg     0.7166    0.8317    0.6236   3778631
+weighted avg     0.9926    0.5864    0.7291   3778631
+
+Confusion matrix (rows = true, cols = predicted)
+               Benign    DDoS    DoS    Bot  BruteForce  Infiltration  Web Attacks
+Benign        1926706      38      8      0           3       1400461           11
+DDoS                0  118185      0      0           0             0       160042
+DoS                 0       0  96798      0           0             0            0
+Bot                 0       0      0  28532           0             0            0
+BruteForce          2       0      0      0       23965             0            0
+Infiltration     2366       0      0      1           0         20845            3
+Web Attacks         0      51      0      0           0             2          612
+
+Per-class detail
+       class  support  precision  recall_DR     f1  TNR_specificity  binary_recall  ROC_AUC_ovr
+      Benign  3327227     0.9988     0.5791 0.7331           0.9948            NaN       0.9917
+        DDoS   278227     0.9992     0.4248 0.5961           1.0000         1.0000       0.4627
+         DoS    96798     0.9999     1.0000 1.0000           1.0000         1.0000       0.5807
+         Bot    28532     1.0000     1.0000 1.0000           1.0000         1.0000       0.3165
+  BruteForce    23967     0.9999     0.9999 0.9999           1.0000         0.9999       0.5388
+Infiltration    23215     0.0147     0.8979 0.0289           0.6271         0.8981       0.8567
+ Web Attacks      665     0.0038     0.9203 0.0076           0.9576         1.0000       0.9821
+
+
+==============================================================================
+lightgbm
+==============================================================================
+              precision    recall  f1-score   support
+
+      Benign     0.9993    0.5634    0.7206   3327227
+        DDoS     0.9984    0.6925    0.8178    278227
+         DoS     1.0000    1.0000    1.0000     96798
+         Bot     0.9999    1.0000    1.0000     28532
+  BruteForce     0.9996    1.0000    0.9998     23967
+Infiltration     0.0148    0.9423    0.0292     23215
+ Web Attacks     0.0045    0.5789    0.0089       665
+
+    accuracy                         0.5925   3778631
+   macro avg     0.7166    0.8253    0.6537   3778631
+weighted avg     0.9930    0.5925    0.7344   3778631
+
+Confusion matrix (rows = true, cols = predicted)
+               Benign    DDoS    DoS    Bot  BruteForce  Infiltration  Web Attacks
+Benign        1874635      35      3      2          10       1452487           55
+DDoS                0  192674      0      0           0             0        85553
+DoS                 1       0  96796      0           0             0            1
+Bot                 0       0      0  28532           0             0            0
+BruteForce          0       0      0      0       23967             0            0
+Infiltration     1333       0      0      0           0         21876            6
+Web Attacks         0     277      0      0           0             3          385
+
+Per-class detail
+       class  support  precision  recall_DR     f1  TNR_specificity  binary_recall  ROC_AUC_ovr
+      Benign  3327227     0.9993     0.5634 0.7206           0.9970            NaN       0.9923
+        DDoS   278227     0.9984     0.6925 0.8178           0.9999         1.0000       0.4878
+         DoS    96798     1.0000     1.0000 1.0000           1.0000         1.0000       0.0062
+         Bot    28532     0.9999     1.0000 1.0000           1.0000         1.0000       0.0001
+  BruteForce    23967     0.9996     1.0000 0.9998           1.0000         1.0000       0.0085
+Infiltration    23215     0.0148     0.9423 0.0292           0.6132         0.9426       0.8679
+ Web Attacks      665     0.0045     0.5789 0.0089           0.9773         1.0000       0.9804
+
+
+==============================================================================
+lightgbm_unweighted
+==============================================================================
+              precision    recall  f1-score   support
+
+      Benign     0.9946    0.9933    0.9939   3327227
+        DDoS     0.9867    0.9972    0.9919    278227
+         DoS     0.9183    0.9823    0.9492     96798
+         Bot     0.9827    0.9982    0.9904     28532
+  BruteForce     0.9531    0.9013    0.9264     23967
+Infiltration     0.3881    0.2852    0.3288     23215
+ Web Attacks     0.0103    0.0346    0.0159       665
+
+    accuracy                         0.9882   3778631
+   macro avg     0.7477    0.7417    0.7424   3778631
+weighted avg     0.9878    0.9882    0.9879   3778631
+
+Confusion matrix (rows = true, cols = predicted)
+               Benign    DDoS    DoS    Bot  BruteForce  Infiltration  Web Attacks
+Benign        3304893    2488   7931    437         793          8664         2021
+DDoS              368  277439     26     63           1           152          178
+DoS               714     604  95086      0         260           127            7
+Bot                25      11      0  28480           0            16            0
+BruteForce        830       7     53      0       21601          1476            0
+Infiltration    16100      32    448      0           9          6620            6
+Web Attacks        42     592      6      0           1             1           23
+
+Per-class detail
+       class  support  precision  recall_DR     f1  TNR_specificity  binary_recall  ROC_AUC_ovr
+      Benign  3327227     0.9946     0.9933 0.9939           0.9599            NaN       0.9825
+        DDoS   278227     0.9867     0.9972 0.9919           0.9989         0.9987       0.1733
+         DoS    96798     0.9183     0.9823 0.9492           0.9977         0.9926       0.3502
+         Bot    28532     0.9827     0.9982 0.9904           0.9999         0.9991       0.0873
+  BruteForce    23967     0.9531     0.9013 0.9264           0.9997         0.9654       0.5866
+Infiltration    23215     0.3881     0.2852 0.3288           0.9972         0.3065       0.8002
+ Web Attacks      665     0.0103     0.0346 0.0159           0.9994         0.9368       0.8105
+
+
+==============================================================================
+logreg
+==============================================================================
+              precision    recall  f1-score   support
+
+      Benign     0.9954    0.5432    0.7028   3327227
+        DDoS     0.9370    0.2784    0.4292    278227
+         DoS     0.7774    0.9638    0.8606     96798
+         Bot     0.9925    0.9998    0.9961     28532
+  BruteForce     0.6508    0.9990    0.7882     23967
+Infiltration     0.0114    0.7185    0.0224     23215
+ Web Attacks     0.0027    0.9278    0.0053       665
+
+    accuracy                         0.5420   3778631
+   macro avg     0.6239    0.7758    0.5435   3778631
+weighted avg     0.9771    0.5420    0.6852   3778631
+
+Confusion matrix (rows = true, cols = predicted)
+               Benign   DDoS    DoS    Bot  BruteForce  Infiltration  Web Attacks
+Benign        1807327   5040  26688    178        9699       1447568        30727
+DDoS             1856  77451     18      0          22           284       198596
+DoS               469      0  93292      0        2982            55            0
+Bot                 0      0      0  28526           0             6            0
+BruteForce          0      0      1      0       23942            24            0
+Infiltration     6052    127      4     39         142         16679          172
+Web Attacks         4     42      2      0           0             0          617
+
+Per-class detail
+       class  support  precision  recall_DR     f1  TNR_specificity  binary_recall  ROC_AUC_ovr
+      Benign  3327227     0.9954     0.5432 0.7028           0.9814            NaN       0.9794
+        DDoS   278227     0.9370     0.2784 0.4292           0.9985         0.9933       0.7012
+         DoS    96798     0.7774     0.9638 0.8606           0.9927         0.9952       0.5108
+         Bot    28532     0.9925     0.9998 0.9961           0.9999         1.0000       0.4967
+  BruteForce    23967     0.6508     0.9990 0.7882           0.9966         1.0000       0.2216
+Infiltration    23215     0.0114     0.7185 0.0224           0.6144         0.7393       0.7198
+ Web Attacks      665     0.0027     0.9278 0.0053           0.9393         0.9940       0.9651
+
+
+==============================================================================
+mlp
+==============================================================================
+              precision    recall  f1-score   support
+
+      Benign     0.9953    0.9397    0.9667   3327227
+        DDoS     0.9953    0.9996    0.9974    278227
+         DoS     0.9823    0.9926    0.9874     96798
+         Bot     0.9994    0.9998    0.9996     28532
+  BruteForce     0.9601    0.9999    0.9796     23967
+Infiltration     0.0416    0.3694    0.0748     23215
+ Web Attacks     0.1304    0.1398    0.1350       665
+
+    accuracy                         0.9426   3778631
+   macro avg     0.7292    0.7772    0.7344   3778631
+weighted avg     0.9888    0.9426    0.9642   3778631
+
+Confusion matrix (rows = true, cols = predicted)
+               Benign    DDoS    DoS    Bot  BruteForce  Infiltration  Web Attacks
+Benign        3126449     762   1730     17         291        197360          618
+DDoS              114  278108      0      0           0             4            1
+DoS                 7       0  96080      0         705             6            0
+Bot                 0       0      0  28526           0             6            0
+BruteForce          0       0      0      0       23965             2            0
+Infiltration    14637       1      0      0           1          8575            1
+Web Attacks        10     559      0      0           0             3           93
+
+Per-class detail
+       class  support  precision  recall_DR     f1  TNR_specificity  binary_recall  ROC_AUC_ovr
+      Benign  3327227     0.9953     0.9397 0.9667           0.9673            NaN       0.9899
+        DDoS   278227     0.9953     0.9996 0.9974           0.9996         0.9996       0.3247
+         DoS    96798     0.9823     0.9926 0.9874           0.9995         0.9999       0.4791
+         Bot    28532     0.9994     0.9998 0.9996           1.0000         1.0000       0.7075
+  BruteForce    23967     0.9601     0.9999 0.9796           0.9997         1.0000       0.4570
+Infiltration    23215     0.0416     0.3694 0.0748           0.9474         0.3695       0.8309
+ Web Attacks      665     0.1304     0.1398 0.1350           0.9998         0.9850       0.9745
+
+
+==============================================================================
+randomforest
+==============================================================================
+              precision    recall  f1-score   support
+
+      Benign     0.9991    0.6080    0.7560   3327227
+        DDoS     0.9984    0.7353    0.8469    278227
+         DoS     1.0000    1.0000    1.0000     96798
+         Bot     1.0000    1.0000    1.0000     28532
+  BruteForce     0.9993    1.0000    0.9997     23967
+Infiltration     0.0161    0.9207    0.0317     23215
+ Web Attacks     0.0047    0.5188    0.0092       665
+
+    accuracy                         0.6348   3778631
+   macro avg     0.7168    0.8261    0.6634   3778631
+weighted avg     0.9929    0.6348    0.7677   3778631
+
+Confusion matrix (rows = true, cols = predicted)
+               Benign    DDoS    DoS    Bot  BruteForce  Infiltration  Web Attacks
+Benign        2023085       1      3      0          16       1304107           15
+DDoS                0  204590      0      0           0             0        73637
+DoS                 0       0  96798      0           0             0            0
+Bot                 0       0      0  28532           0             0            0
+BruteForce          0       0      0      0       23967             0            0
+Infiltration     1839       0      0      0           0         21374            2
+Web Attacks         1     317      0      0           0             2          345
+
+Per-class detail
+       class  support  precision  recall_DR     f1  TNR_specificity  binary_recall  ROC_AUC_ovr
+      Benign  3327227     0.9991     0.6080 0.7560           0.9959            NaN       0.9930
+        DDoS   278227     0.9984     0.7353 0.8469           0.9999         1.0000       0.4789
+         DoS    96798     1.0000     1.0000 1.0000           1.0000         1.0000       0.4965
+         Bot    28532     1.0000     1.0000 1.0000           1.0000         1.0000       0.4598
+  BruteForce    23967     0.9993     1.0000 0.9997           1.0000         1.0000       0.4865
+Infiltration    23215     0.0161     0.9207 0.0317           0.6527         0.9208       0.8794
+ Web Attacks      665     0.0047     0.5188 0.0092           0.9805         0.9985       0.9792
+
+
+==============================================================================
+voting
+==============================================================================
+              precision    recall  f1-score   support
+
+      Benign     0.9992    0.5725    0.7280   3327227
+        DDoS     0.9880    0.4078    0.5773    278227
+         DoS     0.9718    0.9461    0.9588     96798
+         Bot     0.6371    0.9542    0.7641     28532
+  BruteForce     0.8032    0.8893    0.8441     23967
+Infiltration     0.0151    0.9363    0.0296     23215
+ Web Attacks     0.0037    0.8406    0.0074       665
+
+    accuracy                         0.5771   3778631
+   macro avg     0.6312    0.7924    0.5585   3778631
+weighted avg     0.9875    0.5771    0.7194   3778631
+
+Confusion matrix (rows = true, cols = predicted)
+               Benign    DDoS    DoS    Bot  BruteForce  Infiltration  Web Attacks
+Benign        1904928       1      8     30           7       1422220           33
+DDoS                0  113455      0  15442           0             0       149330
+DoS                 0       0  91581      0        5217             0            0
+Bot                 0    1306      0  27226           0             0            0
+BruteForce          0       0   2652      0       21315             0            0
+Infiltration     1475       0      0      0           0         21736            4
+Web Attacks         0      71      0     34           0             1          559
+
+Per-class detail
+       class  support  precision  recall_DR     f1  TNR_specificity  binary_recall  ROC_AUC_ovr
+      Benign  3327227     0.9992     0.5725 0.7280           0.9967            NaN       0.9925
+        DDoS   278227     0.9880     0.4078 0.5773           0.9996         1.0000       0.9918
+         DoS    96798     0.9718     0.9461 0.9588           0.9993         1.0000       0.9993
+         Bot    28532     0.6371     0.9542 0.7641           0.9959         1.0000       1.0000
+  BruteForce    23967     0.8032     0.8893 0.8441           0.9986         1.0000       0.9997
+Infiltration    23215     0.0151     0.9363 0.0296           0.6213         0.9365       0.8701
+ Web Attacks      665     0.0037     0.8406 0.0074           0.9605         1.0000       0.9803
+
+
+==============================================================================
+xgboost
+==============================================================================
+              precision    recall  f1-score   support
+
+      Benign     0.9991    0.5803    0.7342   3327227
+        DDoS     0.9985    0.6920    0.8174    278227
+         DoS     1.0000    1.0000    1.0000     96798
+         Bot     1.0000    1.0000    1.0000     28532
+  BruteForce     0.9990    1.0000    0.9995     23967
+Infiltration     0.0152    0.9284    0.0299     23215
+ Web Attacks     0.0046    0.5910    0.0091       665
+
+    accuracy                         0.6072   3778631
+   macro avg     0.7166    0.8274    0.6557   3778631
+weighted avg     0.9929    0.6072    0.7464   3778631
+
+Confusion matrix (rows = true, cols = predicted)
+               Benign    DDoS    DoS    Bot  BruteForce  Infiltration  Web Attacks
+Benign        1930783      20      1      1          24       1396368           30
+DDoS                0  192523      0      0           0             0        85704
+DoS                 0       0  96798      0           0             0            0
+Bot                 0       0      0  28532           0             0            0
+BruteForce          0       0      0      0       23967             0            0
+Infiltration     1658       0      0      0           0         21553            4
+Web Attacks         0     271      0      0           0             1          393
+
+Per-class detail
+       class  support  precision  recall_DR     f1  TNR_specificity  binary_recall  ROC_AUC_ovr
+      Benign  3327227     0.9991     0.5803 0.7342           0.9963            NaN       0.9925
+        DDoS   278227     0.9985     0.6920 0.8174           0.9999         1.0000       0.9999
+         DoS    96798     1.0000     1.0000 1.0000           1.0000         1.0000       1.0000
+         Bot    28532     1.0000     1.0000 1.0000           1.0000         1.0000       1.0000
+  BruteForce    23967     0.9990     1.0000 0.9995           1.0000         1.0000       1.0000
+Infiltration    23215     0.0152     0.9284 0.0299           0.6282         0.9286       0.8702
+ Web Attacks      665     0.0046     0.5910 0.0091           0.9773         1.0000       0.9802
+
+
+==============================================================================
+cascade_tuned_argmax
+==============================================================================
+              precision    recall  f1-score   support
+
+      Benign     0.9952    0.9998    0.9975   3327227
+        DDoS     0.9982    0.8157    0.8977    278227
+         DoS     1.0000    1.0000    1.0000     96798
+         Bot     1.0000    1.0000    1.0000     28532
+  BruteForce     0.9995    1.0000    0.9997     23967
+Infiltration     0.9015    0.3048    0.4555     23215
+ Web Attacks     0.0053    0.4075    0.0104       665
+
+    accuracy                         0.9818   3778631
+   macro avg     0.8428    0.7897    0.7658   3778631
+weighted avg     0.9948    0.9818    0.9867   3778631
+
+Confusion matrix (rows = true, cols = predicted)
+               Benign    DDoS    DoS    Bot  BruteForce  Infiltration  Web Attacks
+Benign        3326404      20      2      0          13           771           17
+DDoS                0  226936      0      0           0             0        51291
+DoS                 0       0  96798      0           0             0            0
+Bot                 0       0      0  28532           0             0            0
+BruteForce          0       0      0      0       23967             0            0
+Infiltration    16137       0      0      0           0          7075            3
+Web Attacks         4     388      0      0           0             2          271
+
+Per-class detail
+       class  support  precision  recall_DR     f1  TNR_specificity  binary_recall  ROC_AUC_ovr
+      Benign  3327227     0.9952     0.9998 0.9975           0.9642            NaN       0.9922
+        DDoS   278227     0.9982     0.8157 0.8977           0.9999         1.0000       0.9999
+         DoS    96798     1.0000     1.0000 1.0000           1.0000         1.0000       1.0000
+         Bot    28532     1.0000     1.0000 1.0000           1.0000         1.0000       1.0000
+  BruteForce    23967     0.9995     1.0000 0.9997           1.0000         1.0000       1.0000
+Infiltration    23215     0.9015     0.3048 0.4555           0.9998         0.3049       0.8655
+ Web Attacks      665     0.0053     0.4075 0.0104           0.9864         0.9940       0.9788
+
+
+==============================================================================
+cascade_tuned_tau
+==============================================================================
+              precision    recall  f1-score   support
+
+      Benign     0.9952    0.9995    0.9974   3327227
+        DDoS     0.9961    0.9998    0.9979    278227
+         DoS     1.0000    1.0000    1.0000     96798
+         Bot     1.0000    1.0000    1.0000     28532
+  BruteForce     0.9994    1.0000    0.9997     23967
+Infiltration     0.8746    0.3082    0.4558     23215
+ Web Attacks     0.6273    0.1519    0.2446       665
+
+    accuracy                         0.9952   3778631
+   macro avg     0.9275    0.7799    0.8136   3778631
+weighted avg     0.9946    0.9952    0.9940   3778631
+
+Confusion matrix (rows = true, cols = predicted)
+               Benign    DDoS    DoS    Bot  BruteForce  Infiltration  Web Attacks
+Benign        3325646     539      1      0          14          1024            3
+DDoS                0  278172      0      0           0             0           55
+DoS                 0       1  96797      0           0             0            0
+Bot                 0       0      0  28532           0             0            0
+BruteForce          0       0      0      0       23967             0            0
+Infiltration    16057       0      0      0           0          7156            2
+Web Attacks         4     558      0      0           0             2          101
+
+Per-class detail
+       class  support  precision  recall_DR     f1  TNR_specificity  binary_recall  ROC_AUC_ovr
+      Benign  3327227     0.9952     0.9995 0.9974           0.9644            NaN       0.9922
+        DDoS   278227     0.9961     0.9998 0.9979           0.9997         1.0000       0.9999
+         DoS    96798     1.0000     1.0000 1.0000           1.0000         1.0000       1.0000
+         Bot    28532     1.0000     1.0000 1.0000           1.0000         1.0000       1.0000
+  BruteForce    23967     0.9994     1.0000 0.9997           1.0000         1.0000       1.0000
+Infiltration    23215     0.8746     0.3082 0.4558           0.9997         0.3083       0.8655
+ Web Attacks      665     0.6273     0.1519 0.2446           1.0000         0.9940       0.9788
+
+
+==============================================================================
+flat_tuned_argmax
+==============================================================================
+              precision    recall  f1-score   support
+
+      Benign     0.9952    0.9996    0.9974   3327227
+        DDoS     0.9980    1.0000    0.9990    278227
+         DoS     0.9999    1.0000    1.0000     96798
+         Bot     0.9999    1.0000    1.0000     28532
+  BruteForce     0.9994    1.0000    0.9997     23967
+Infiltration     0.8342    0.3138    0.4560     23215
+ Web Attacks     0.9286    0.1564    0.2677       665
+
+    accuracy                         0.9952   3778631
+   macro avg     0.9650    0.7814    0.8171   3778631
+weighted avg     0.9946    0.9952    0.9942   3778631
+
+Confusion matrix (rows = true, cols = predicted)
+               Benign    DDoS    DoS    Bot  BruteForce  Infiltration  Web Attacks
+Benign        3325751       6      5      1          15          1446            3
+DDoS                0  278226      0      0           0             0            1
+DoS                 0       0  96798      0           0             0            0
+Bot                 0       0      0  28532           0             0            0
+BruteForce          0       0      0      0       23967             0            0
+Infiltration    15926       0      0      1           0          7284            4
+Web Attacks         0     559      0      0           0             2          104
+
+Per-class detail
+       class  support  precision  recall_DR     f1  TNR_specificity  binary_recall  ROC_AUC_ovr
+      Benign  3327227     0.9952     0.9996 0.9974           0.9647            NaN       0.9925
+        DDoS   278227     0.9980     1.0000 0.9990           0.9998         1.0000       1.0000
+         DoS    96798     0.9999     1.0000 1.0000           1.0000         1.0000       1.0000
+         Bot    28532     0.9999     1.0000 1.0000           1.0000         1.0000       1.0000
+  BruteForce    23967     0.9994     1.0000 0.9997           1.0000         1.0000       1.0000
+Infiltration    23215     0.8342     0.3138 0.4560           0.9996         0.3140       0.8714
+ Web Attacks      665     0.9286     0.1564 0.2677           1.0000         1.0000       0.9811
+
+
+==============================================================================
+flat_tuned_tau
+==============================================================================
+              precision    recall  f1-score   support
+
+      Benign     0.9952    0.9997    0.9975   3327227
+        DDoS     0.9979    1.0000    0.9990    278227
+         DoS     1.0000    1.0000    1.0000     96798
+         Bot     1.0000    1.0000    1.0000     28532
+  BruteForce     0.9997    1.0000    0.9998     23967
+Infiltration     0.8907    0.3092    0.4590     23215
+ Web Attacks     0.8203    0.1579    0.2648       665
+
+    accuracy                         0.9954   3778631
+   macro avg     0.9577    0.7810    0.8172   3778631
+weighted avg     0.9949    0.9954    0.9942   3778631
+
+Confusion matrix (rows = true, cols = predicted)
+               Benign    DDoS    DoS    Bot  BruteForce  Infiltration  Web Attacks
+Benign        3326292      24      3      1           8           880           19
+DDoS                0  278227      0      0           0             0            0
+DoS                 0       0  96798      0           0             0            0
+Bot                 0       0      0  28532           0             0            0
+BruteForce          0       0      0      0       23967             0            0
+Infiltration    16033       0      0      0           0          7178            4
+Web Attacks         0     559      0      0           0             1          105
+
+Per-class detail
+       class  support  precision  recall_DR     f1  TNR_specificity  binary_recall  ROC_AUC_ovr
+      Benign  3327227     0.9952     0.9997 0.9975           0.9645            NaN       0.9925
+        DDoS   278227     0.9979     1.0000 0.9990           0.9998         1.0000       1.0000
+         DoS    96798     1.0000     1.0000 1.0000           1.0000         1.0000       1.0000
+         Bot    28532     1.0000     1.0000 1.0000           1.0000         1.0000       1.0000
+  BruteForce    23967     0.9997     1.0000 0.9998           1.0000         1.0000       1.0000
+Infiltration    23215     0.8907     0.3092 0.4590           0.9998         0.3094       0.8714
+ Web Attacks      665     0.8203     0.1579 0.2648           1.0000         1.0000       0.9811

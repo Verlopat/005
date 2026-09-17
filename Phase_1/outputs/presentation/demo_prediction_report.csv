@@ -1,0 +1,26 @@
+﻿Row,True Class,Predicted Class,Correct (YES/NO),Confidence,Anchor On-Chain,P(Benign),P(DDoS),P(DoS),P(Bot),P(BruteForce),P(Infiltration),P(Web Attacks)
+1,Benign,Benign,YES,0.0002,NO,0.996,0.0001,0.0,0.0,0.0,0.0039,0.0
+2,DoS,DoS,YES,1.0,YES,0.0,0.0,1.0,0.0,0.0,0.0,0.0
+3,Benign,Benign,YES,0.0088,NO,0.9099,0.0002,0.0001,0.0,0.0,0.0897,0.0
+4,Infiltration,Infiltration,YES,0.9507,NO,0.044,0.0001,0.0,0.0,0.0,0.9559,0.0
+5,DDoS,DDoS,YES,1.0,YES,0.0,0.9996,0.0,0.0,0.0,0.0,0.0003
+6,Benign,Benign,YES,0.0,NO,0.9996,0.0,0.0,0.0,0.0,0.0004,0.0
+7,DDoS,DDoS,YES,1.0,YES,0.0001,0.9969,0.0,0.0,0.0,0.0,0.0029
+8,Benign,Benign,YES,0.0,NO,0.9995,0.0,0.0,0.0,0.0,0.0004,0.0
+9,BruteForce,BruteForce,YES,1.0,YES,0.0,0.0,0.0,0.0,1.0,0.0,0.0
+10,Benign,Benign,YES,0.0,NO,0.9992,0.0,0.0,0.0,0.0,0.0007,0.0
+11,Benign,Benign,YES,0.0149,NO,0.8659,0.0003,0.0001,0.0,0.0,0.1336,0.0
+12,DDoS,DDoS,YES,1.0,YES,0.0,1.0,0.0,0.0,0.0,0.0,0.0
+13,DoS,DoS,YES,1.0,YES,0.0,0.0,1.0,0.0,0.0,0.0,0.0
+14,Benign,Benign,YES,0.0106,NO,0.9015,0.0002,0.0001,0.0,0.0,0.0981,0.0
+15,Benign,Benign,YES,0.0,NO,0.9985,0.0001,0.0,0.0,0.0,0.0014,0.0
+16,BruteForce,BruteForce,YES,1.0,YES,0.0,0.0,0.0,0.0,1.0,0.0,0.0
+17,Bot,Bot,YES,1.0,YES,0.0,0.0,0.0,1.0,0.0,0.0,0.0
+18,BruteForce,BruteForce,YES,1.0,YES,0.0,0.0,0.0,0.0,1.0,0.0,0.0
+19,Bot,Bot,YES,1.0,YES,0.0,0.0,0.0,1.0,0.0,0.0,0.0
+20,Web Attacks,DDoS,NO,1.0,YES,0.0,0.9963,0.0,0.0,0.0,0.0,0.0036
+21,Benign,Benign,YES,0.0,NO,0.9994,0.0,0.0,0.0,0.0,0.0005,0.0
+22,DDoS,DDoS,YES,1.0,YES,0.0,0.9971,0.0,0.0,0.0,0.0,0.0029
+23,DoS,DoS,YES,1.0,YES,0.0,0.0,1.0,0.0,0.0,0.0,0.0
+24,Bot,Bot,YES,1.0,YES,0.0,0.0,0.0,1.0,0.0,0.0,0.0
+25,Benign,Benign,YES,0.0,NO,0.9997,0.0001,0.0,0.0,0.0,0.0002,0.0

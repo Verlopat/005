@@ -1,0 +1,12 @@
+﻿Property,Value
+model_version,flat_tuned_tau-fa8d2667cc39
+model_id_sha256,fa8d2667cc39cea50abe78f813133ead89e9dea3a317da436c14dcfc41fbf820
+architecture,"LightGBM multiclass, 7 coarse threat categories"
+training.dataset,NF-CSE-CIC-IDS2018-v2
+training.split,"60/20/20 by row position, no shuffling"
+n_features,25
+test_metrics.macro_f1,0.8172
+test_metrics.accuracy,0.9954
+test_metrics.binary_f1,0.9809
+calibration,"isotonic, fitted on the validation fold"
+anchoring_gate.tau,0.9998

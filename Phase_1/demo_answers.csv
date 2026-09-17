@@ -1,0 +1,26 @@
+row,true_class
+1,Benign
+2,DoS
+3,Benign
+4,Infiltration
+5,DDoS
+6,Benign
+7,DDoS
+8,Benign
+9,BruteForce
+10,Benign
+11,Benign
+12,DDoS
+13,DoS
+14,Benign
+15,Benign
+16,BruteForce
+17,Bot
+18,BruteForce
+19,Bot
+20,Web Attacks
+21,Benign
+22,DDoS
+23,DoS
+24,Bot
+25,Benign

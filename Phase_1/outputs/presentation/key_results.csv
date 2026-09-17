@@ -1,0 +1,19 @@
+﻿Metric,Value
+Macro-F1,0.8172
+Accuracy,0.9954
+Binary F1,0.9809
+Precision (macro),0.9577
+Recall (macro),0.781
+Specificity,0.9997
+FPR,0.0003
+ROC-AUC,0.9925
+MCC,0.9786
+Expected Calibration Error,0.0001
+Brier Score,0.0043
+Integrity Coverage Ratio,0.9568
+On-Chain Volume,0.1143
+Ledger Write Reduction,0.8857
+Inference Latency (ms/event),4.9955
+Test Set Size,3778631
+Number of Classes,7
+Number of Features,25

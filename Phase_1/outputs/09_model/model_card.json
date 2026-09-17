@@ -1,0 +1,93 @@
+{
+  "model_id_sha256": "fa8d2667cc39cea50abe78f813133ead89e9dea3a317da436c14dcfc41fbf820",
+  "model_version": "flat_tuned_tau-fa8d2667cc39",
+  "variant": "flat_tuned_tau",
+  "architecture": "LightGBM multiclass, 7 coarse threat categories",
+  "class_thresholds": {
+    "Benign": 0.7,
+    "DDoS": 0.1,
+    "DoS": 5.0,
+    "Bot": 1.0,
+    "BruteForce": 5.0,
+    "Infiltration": 1.0,
+    "Web Attacks": 0.2
+  },
+  "created_utc": "2026-08-20T07:26:37.515388+00:00",
+  "python": "3.14.3",
+  "hyperparameters": {
+    "n_estimators": 300,
+    "learning_rate": 0.024859855155178027,
+    "num_leaves": 69,
+    "max_depth": 8,
+    "min_child_samples": 8,
+    "min_split_gain": 0.46053672299163784,
+    "subsample": 0.7648378794672472,
+    "subsample_freq": 3,
+    "colsample_bytree": 0.8995170862877813,
+    "reg_alpha": 5.517944163753552e-08,
+    "reg_lambda": 0.2681407600409429
+  },
+  "features": [
+    "SRC_TO_DST_SECOND_BYTES",
+    "LONGEST_FLOW_PKT",
+    "SRC_TO_DST_AVG_THROUGHPUT",
+    "IN_BYTES",
+    "L7_PROTO",
+    "TCP_WIN_MAX_OUT",
+    "DURATION_OUT",
+    "DURATION_IN",
+    "FLOW_DURATION_MILLISECONDS",
+    "RETRANSMITTED_OUT_BYTES",
+    "DST_TO_SRC_AVG_THROUGHPUT",
+    "TCP_WIN_MAX_IN",
+    "OUT_BYTES",
+    "NUM_PKTS_256_TO_512_BYTES",
+    "NUM_PKTS_128_TO_256_BYTES",
+    "RETRANSMITTED_OUT_PKTS",
+    "MAX_TTL",
+    "CLIENT_TCP_FLAGS",
+    "DST_TO_SRC_SECOND_BYTES",
+    "ICMP_TYPE",
+    "RETRANSMITTED_IN_BYTES",
+    "SHORTEST_FLOW_PKT",
+    "RETRANSMITTED_IN_PKTS",
+    "DNS_QUERY_ID",
+    "MIN_IP_PKT_LEN"
+  ],
+  "n_features": 25,
+  "labels": [
+    "Benign",
+    "DDoS",
+    "DoS",
+    "Bot",
+    "BruteForce",
+    "Infiltration",
+    "Web Attacks"
+  ],
+  "calibration": "isotonic, fitted on the validation fold",
+  "anchoring_gate": {
+    "icr_target": 0.95,
+    "tau": 0.9997655153274536,
+    "icr": 0.9568036614651176,
+    "on_chain_volume": 0.1143022433256912,
+    "write_reduction": 0.8856977566743087,
+    "anchor_precision": 0.999997684681389
+  },
+  "training": {
+    "dataset": "NF-CSE-CIC-IDS2018-v2",
+    "split": "60/20/20 by row position, no shuffling",
+    "benign_downsampling": "train only, keep fraction 0.09",
+    "val_test_prior": "natural (no downsampling)",
+    "fit_minutes": 3.959895398333174
+  },
+  "test_metrics": {
+    "macro_f1": 0.8171522873728747,
+    "accuracy": 0.995360224377559,
+    "binary_f1": 0.9808856495927725
+  },
+  "notes": [
+    "Identifiers (IPs, ports) are never model features; they travel alongside the feature vector as alert metadata.",
+    "model_id_sha256 covers the booster, the ordered feature list, the label order and the hyperparameters. Anchor it once per retrain so every alert can be traced to the model that produced it.",
+    "Infiltration carries markedly lower confidence than other classes and is excluded first as the gate rises \u2014 see 08_calibration_icr/icr_per_class.csv."
+  ]
+}

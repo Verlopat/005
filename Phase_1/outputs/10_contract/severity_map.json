@@ -1,0 +1,9 @@
+{
+  "Benign": "NONE",
+  "DDoS": "HIGH",
+  "DoS": "HIGH",
+  "Bot": "HIGH",
+  "BruteForce": "MEDIUM",
+  "Infiltration": "CRITICAL",
+  "Web Attacks": "HIGH"
+}

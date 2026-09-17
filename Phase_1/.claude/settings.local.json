@@ -1,0 +1,10 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(mkdir -p /f/Cloud-Ids/data /f/Cloud-Ids/work/splits /f/Cloud-Ids/outputs)",
+      "Bash(touch /f/Cloud-Ids/data/.gitkeep /f/Cloud-Ids/work/.gitkeep /f/Cloud-Ids/outputs/.gitkeep)",
+      "Bash(python -c \"import sys; print\\(sys.version\\)\")",
+      "Bash(py -3 -c \"import sys; print\\(sys.version\\)\")"
+    ]
+  }
+}

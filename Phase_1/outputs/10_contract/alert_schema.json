@@ -1,0 +1,192 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://anurag.edu/cloud-ids/alert_schema/1.0.0",
+  "title": "Cloud IDS Security Alert",
+  "description": "Frozen interface between the detection layer (Layer 1) and the blockchain logging layer (Layer 2).",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "event_id",
+    "schema_version",
+    "timestamp",
+    "verdict",
+    "threat_class",
+    "severity",
+    "confidence",
+    "model_version",
+    "cloud_resource_id",
+    "feature_digest",
+    "event_hash",
+    "anchor",
+    "inference_latency_ms"
+  ],
+  "properties": {
+    "event_id": {
+      "type": "string",
+      "format": "uuid"
+    },
+    "schema_version": {
+      "type": "string",
+      "const": "1.0.0"
+    },
+    "timestamp": {
+      "type": "string",
+      "format": "date-time",
+      "description": "RFC 3339, UTC, millisecond precision"
+    },
+    "verdict": {
+      "type": "string",
+      "enum": [
+        "ANOMALY",
+        "NORMAL"
+      ]
+    },
+    "threat_class": {
+      "type": "string",
+      "enum": [
+        "Benign",
+        "DDoS",
+        "DoS",
+        "Bot",
+        "BruteForce",
+        "Infiltration",
+        "Web Attacks"
+      ]
+    },
+    "severity": {
+      "type": "string",
+      "enum": [
+        "NONE",
+        "LOW",
+        "MEDIUM",
+        "HIGH",
+        "CRITICAL"
+      ]
+    },
+    "confidence": {
+      "type": "number",
+      "minimum": 0.0,
+      "maximum": 1.0,
+      "description": "Isotonic-calibrated P(attack). ECE 0.000081 on the held-out test fold."
+    },
+    "model_version": {
+      "type": "string",
+      "description": "SHA-256-derived model identifier; anchored on-chain once per retrain."
+    },
+    "src_ip": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "src_port": {
+      "type": [
+        "integer",
+        "null"
+      ],
+      "minimum": 0,
+      "maximum": 65535
+    },
+    "dst_ip": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "dst_port": {
+      "type": [
+        "integer",
+        "null"
+      ],
+      "minimum": 0,
+      "maximum": 65535
+    },
+    "cloud_resource_id": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "description": "Synthetically derived from the destination host; see CONTRACT.md."
+    },
+    "features": {
+      "type": "object",
+      "description": "Triggering feature values.",
+      "additionalProperties": {
+        "type": "number"
+      },
+      "propertyNames": {
+        "enum": [
+          "SRC_TO_DST_SECOND_BYTES",
+          "LONGEST_FLOW_PKT",
+          "SRC_TO_DST_AVG_THROUGHPUT",
+          "IN_BYTES",
+          "L7_PROTO",
+          "TCP_WIN_MAX_OUT",
+          "DURATION_OUT",
+          "DURATION_IN",
+          "FLOW_DURATION_MILLISECONDS",
+          "RETRANSMITTED_OUT_BYTES",
+          "DST_TO_SRC_AVG_THROUGHPUT",
+          "TCP_WIN_MAX_IN",
+          "OUT_BYTES",
+          "NUM_PKTS_256_TO_512_BYTES",
+          "NUM_PKTS_128_TO_256_BYTES",
+          "RETRANSMITTED_OUT_PKTS",
+          "MAX_TTL",
+          "CLIENT_TCP_FLAGS",
+          "DST_TO_SRC_SECOND_BYTES",
+          "ICMP_TYPE",
+          "RETRANSMITTED_IN_BYTES",
+          "SHORTEST_FLOW_PKT",
+          "RETRANSMITTED_IN_PKTS",
+          "DNS_QUERY_ID",
+          "MIN_IP_PKT_LEN"
+        ]
+      }
+    },
+    "feature_digest": {
+      "type": "string",
+      "pattern": "^[0-9a-f]{64}$"
+    },
+    "top_contributing_features": {
+      "type": "array",
+      "maxItems": 5,
+      "items": {
+        "type": "object",
+        "required": [
+          "feature",
+          "value",
+          "shap"
+        ],
+        "properties": {
+          "feature": {
+            "type": "string"
+          },
+          "value": {
+            "type": "number"
+          },
+          "shap": {
+            "type": "number",
+            "description": "Signed contribution toward the predicted class."
+          }
+        }
+      }
+    },
+    "event_hash": {
+      "type": "string",
+      "pattern": "^[0-9a-f]{64}$",
+      "description": "SHA-256 over the canonical string; this is the value committed on-chain."
+    },
+    "anchor": {
+      "type": "boolean",
+      "description": "True when confidence >= the deployment gate."
+    },
+    "anchor_gate_tau": {
+      "type": "number"
+    },
+    "inference_latency_ms": {
+      "type": "number",
+      "minimum": 0
+    }
+  }
+}

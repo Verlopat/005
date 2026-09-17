@@ -1,0 +1,143 @@
+{
+  "digest_fields": [
+    "event_id",
+    "schema_version",
+    "timestamp",
+    "verdict",
+    "threat_class",
+    "confidence",
+    "model_version",
+    "src_ip",
+    "src_port",
+    "dst_ip",
+    "dst_port",
+    "cloud_resource_id",
+    "feature_digest"
+  ],
+  "rules": {
+    "field_order": "fixed, as digest_fields; NOT sorted",
+    "join": "fields joined by '|', each rendered as key=value",
+    "null": "rendered as the single byte 0x00",
+    "float": "fixed six decimals, e.g. 0.999766",
+    "int": "base-10, no padding",
+    "bool": "lowercase true / false",
+    "encoding": "UTF-8, then SHA-256, then lowercase hex"
+  },
+  "vectors": [
+    {
+      "alert": {
+        "event_id": "fc2a5583-5272-5211-8d62-71c520c20b80",
+        "schema_version": "1.0.0",
+        "timestamp": "2026-08-20T19:11:31.536+00:00",
+        "verdict": "ANOMALY",
+        "threat_class": "BruteForce",
+        "confidence": 1.0,
+        "model_version": "flat_tuned_tau-fa8d2667cc39",
+        "src_ip": "13.58.98.64",
+        "src_port": 40756,
+        "dst_ip": "172.31.69.25",
+        "dst_port": 22,
+        "cloud_resource_id": "cloud-res-735a5c8b1a84",
+        "feature_digest": "5441bd0c8d8d8e52410fef2550e68f01763f90103cbf1599027f248a05c1639a"
+      },
+      "canonical_string": "event_id=fc2a5583-5272-5211-8d62-71c520c20b80|schema_version=1.0.0|timestamp=2026-08-20T19:11:31.536+00:00|verdict=ANOMALY|threat_class=BruteForce|confidence=1.000000|model_version=flat_tuned_tau-fa8d2667cc39|src_ip=13.58.98.64|src_port=40756|dst_ip=172.31.69.25|dst_port=22|cloud_resource_id=cloud-res-735a5c8b1a84|feature_digest=5441bd0c8d8d8e52410fef2550e68f01763f90103cbf1599027f248a05c1639a",
+      "expected_sha256": "af6bffc98b10133bc968b0bb0f925c8767c9ab3ebb38fda3966a726b6d6fb50f"
+    },
+    {
+      "alert": {
+        "event_id": "ff68cbe3-05d1-588e-a336-67abaf696ec7",
+        "schema_version": "1.0.0",
+        "timestamp": "2026-08-20T19:11:31.536+00:00",
+        "verdict": "NORMAL",
+        "threat_class": "Benign",
+        "confidence": 0.095303,
+        "model_version": "flat_tuned_tau-fa8d2667cc39",
+        "src_ip": "5.101.40.43",
+        "src_port": 57052,
+        "dst_ip": "172.31.69.16",
+        "dst_port": 3389,
+        "cloud_resource_id": "cloud-res-67e77213995d",
+        "feature_digest": "c0fd64b22209a8f68cce1139c59f5f46a156f922448ed5a4c73c365fb0408556"
+      },
+      "canonical_string": "event_id=ff68cbe3-05d1-588e-a336-67abaf696ec7|schema_version=1.0.0|timestamp=2026-08-20T19:11:31.536+00:00|verdict=NORMAL|threat_class=Benign|confidence=0.095303|model_version=flat_tuned_tau-fa8d2667cc39|src_ip=5.101.40.43|src_port=57052|dst_ip=172.31.69.16|dst_port=3389|cloud_resource_id=cloud-res-67e77213995d|feature_digest=c0fd64b22209a8f68cce1139c59f5f46a156f922448ed5a4c73c365fb0408556",
+      "expected_sha256": "2a0571ba86b8b2ab1028d74350c1b4d6d0cc6fcd01400d40579921745dcea889"
+    },
+    {
+      "alert": {
+        "event_id": "7d6181c3-be42-5f23-9683-b7a652721b63",
+        "schema_version": "1.0.0",
+        "timestamp": "2026-08-20T19:11:31.536+00:00",
+        "verdict": "ANOMALY",
+        "threat_class": "DoS",
+        "confidence": 1.0,
+        "model_version": "flat_tuned_tau-fa8d2667cc39",
+        "src_ip": "18.219.193.20",
+        "src_port": 34878,
+        "dst_ip": "172.31.69.25",
+        "dst_port": 80,
+        "cloud_resource_id": "cloud-res-735a5c8b1a84",
+        "feature_digest": "9acfcc7dca8fe22d20798a9cca1476507c61fc9fbe3f53a6dbcf6b03ecc75238"
+      },
+      "canonical_string": "event_id=7d6181c3-be42-5f23-9683-b7a652721b63|schema_version=1.0.0|timestamp=2026-08-20T19:11:31.536+00:00|verdict=ANOMALY|threat_class=DoS|confidence=1.000000|model_version=flat_tuned_tau-fa8d2667cc39|src_ip=18.219.193.20|src_port=34878|dst_ip=172.31.69.25|dst_port=80|cloud_resource_id=cloud-res-735a5c8b1a84|feature_digest=9acfcc7dca8fe22d20798a9cca1476507c61fc9fbe3f53a6dbcf6b03ecc75238",
+      "expected_sha256": "b7002d5945d747570f0c06f016d0e1f8e30e2ec2dd6b2e3aa07c9436eac67936"
+    },
+    {
+      "alert": {
+        "event_id": "a37cf9bb-d339-52d5-8568-a0e684368444",
+        "schema_version": "1.0.0",
+        "timestamp": "2026-08-20T19:11:31.536+00:00",
+        "verdict": "ANOMALY",
+        "threat_class": "DDoS",
+        "confidence": 1.0,
+        "model_version": "flat_tuned_tau-fa8d2667cc39",
+        "src_ip": "18.216.200.189",
+        "src_port": 52698,
+        "dst_ip": "172.31.69.28",
+        "dst_port": 80,
+        "cloud_resource_id": "cloud-res-9e67880ff6de",
+        "feature_digest": "d012ab43cb8184abd2de7f6b1b56826f4d4f951e925d62190e97d1b11f26698c"
+      },
+      "canonical_string": "event_id=a37cf9bb-d339-52d5-8568-a0e684368444|schema_version=1.0.0|timestamp=2026-08-20T19:11:31.536+00:00|verdict=ANOMALY|threat_class=DDoS|confidence=1.000000|model_version=flat_tuned_tau-fa8d2667cc39|src_ip=18.216.200.189|src_port=52698|dst_ip=172.31.69.28|dst_port=80|cloud_resource_id=cloud-res-9e67880ff6de|feature_digest=d012ab43cb8184abd2de7f6b1b56826f4d4f951e925d62190e97d1b11f26698c",
+      "expected_sha256": "4f8e06eb57a655ee7cb08925f0fb07b0c8c4a2774732896b4079a3cad0f562fe"
+    },
+    {
+      "alert": {
+        "event_id": "fb76abe0-98ea-5532-862e-4f469e0d45ca",
+        "schema_version": "1.0.0",
+        "timestamp": "2026-08-20T19:11:31.536+00:00",
+        "verdict": "ANOMALY",
+        "threat_class": "DoS",
+        "confidence": 1.0,
+        "model_version": "flat_tuned_tau-fa8d2667cc39",
+        "src_ip": "18.219.193.20",
+        "src_port": 47302,
+        "dst_ip": "172.31.69.25",
+        "dst_port": 80,
+        "cloud_resource_id": "cloud-res-735a5c8b1a84",
+        "feature_digest": "34ddd785b06c49292f88d0a77ce0293859fa25971a024e345e007e3185a1c882"
+      },
+      "canonical_string": "event_id=fb76abe0-98ea-5532-862e-4f469e0d45ca|schema_version=1.0.0|timestamp=2026-08-20T19:11:31.536+00:00|verdict=ANOMALY|threat_class=DoS|confidence=1.000000|model_version=flat_tuned_tau-fa8d2667cc39|src_ip=18.219.193.20|src_port=47302|dst_ip=172.31.69.25|dst_port=80|cloud_resource_id=cloud-res-735a5c8b1a84|feature_digest=34ddd785b06c49292f88d0a77ce0293859fa25971a024e345e007e3185a1c882",
+      "expected_sha256": "2c3b29f907deab9f95411794731d895c8e004cc6c40ba49ceec82e3c42f4909b"
+    },
+    {
+      "alert": {
+        "event_id": null,
+        "schema_version": null,
+        "timestamp": null,
+        "verdict": null,
+        "threat_class": null,
+        "confidence": null,
+        "model_version": null,
+        "src_ip": null,
+        "src_port": null,
+        "dst_ip": null,
+        "dst_port": null,
+        "cloud_resource_id": null,
+        "feature_digest": null
+      },
+      "canonical_string": "event_id=\u0000|schema_version=\u0000|timestamp=\u0000|verdict=\u0000|threat_class=\u0000|confidence=\u0000|model_version=\u0000|src_ip=\u0000|src_port=\u0000|dst_ip=\u0000|dst_port=\u0000|cloud_resource_id=\u0000|feature_digest=\u0000",
+      "expected_sha256": "99efa3c2314ff91e724674be9279ee6c0f78be75a6989b67264c4fbe1bedd945",
+      "note": "all-null case: exercises the null sentinel"
+    }
+  ]
+}

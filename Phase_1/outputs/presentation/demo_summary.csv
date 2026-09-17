@@ -1,0 +1,14 @@
+﻿Metric,Value
+Total Rows,25
+Correct,24
+Incorrect,1
+Accuracy,0.96
+
+Class,Rows,Correct,Recall
+Benign,10,10,1.0
+DoS,3,3,1.0
+Infiltration,1,1,1.0
+DDoS,4,4,1.0
+BruteForce,3,3,1.0
+Bot,3,3,1.0
+Web Attacks,1,0,0.0

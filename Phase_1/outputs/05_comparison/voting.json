@@ -1,0 +1,72 @@
+{
+  "as_sampled": {
+    "accuracy": 0.577140239414751,
+    "macro_f1": 0.5584593915605583,
+    "binary_precision": 0.24031741860499897,
+    "binary_recall": 0.9967324170809297,
+    "binary_f1": 0.3872635598063721,
+    "fpr": 0.42747278739923666
+  },
+  "natural_prior": {
+    "accuracy": 0.5729930236630016,
+    "macro_f1": 0.5539512979874799,
+    "binary_precision": 0.02768239989860458,
+    "binary_recall": 0.9967324170809297,
+    "binary_f1": 0.05386869636050619,
+    "fpr": 0.4274727873992366
+  },
+  "per_class": {
+    "Benign": {
+      "support": 3327227,
+      "recall": 0.5725272126007633,
+      "f1": 0.7279566954484745,
+      "binary_recall": null
+    },
+    "DDoS": {
+      "support": 278227,
+      "recall": 0.40777854054423185,
+      "f1": 0.5772909988296953,
+      "binary_recall": 1.0
+    },
+    "DoS": {
+      "support": 96798,
+      "recall": 0.9461042583524453,
+      "f1": 0.9587675814885965,
+      "binary_recall": 1.0
+    },
+    "Bot": {
+      "support": 28532,
+      "recall": 0.9542268330295808,
+      "f1": 0.7640884598114055,
+      "binary_recall": 1.0
+    },
+    "BruteForce": {
+      "support": 23967,
+      "recall": 0.8893478532982851,
+      "f1": 0.844058131707124,
+      "binary_recall": 1.0
+    },
+    "Infiltration": {
+      "support": 23215,
+      "recall": 0.9362911910402757,
+      "f1": 0.02962979119012631,
+      "binary_recall": 0.9364634934309713
+    },
+    "Web Attacks": {
+      "support": 665,
+      "recall": 0.8406015037593985,
+      "f1": 0.007424082448486297,
+      "binary_recall": 1.0
+    }
+  },
+  "members": [
+    "lightgbm",
+    "xgboost"
+  ],
+  "fit_minutes": 3.39093050666667,
+  "latency": {
+    "batch_p99_ms": 22.50005899975804,
+    "single_p99_ms": 8.8361419994726,
+    "note": "summed across members"
+  }
+}
