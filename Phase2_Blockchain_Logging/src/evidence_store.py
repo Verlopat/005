@@ -7,9 +7,10 @@ together with essential metadata ... is committed on-chain."
 
 This module implements the local-filesystem content-addressed backend used
 by default (`storage.backend: local_content_addressed` in
-config/phase2.example.yaml) and a thin adapter interface so an IPFS backend
-(directed by the Phase 1 handoff document for the 10.9 MB STAHN model
-artifact) can be swapped in without changing callers.
+config/phase2.example.yaml) and a thin adapter interface so an IPFS backend can
+be swapped in without changing callers. The same interface holds the exported
+Phase 1 detector artifact, whose content address is anchored once per retraining
+cycle in the model provenance record.
 """
 from __future__ import annotations
 

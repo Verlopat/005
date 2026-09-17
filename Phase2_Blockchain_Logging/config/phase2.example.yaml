@@ -1,26 +1,46 @@
-contract_version: "1.0.0"
+contract_version: "2.0.0"
 
+# Detection layer of record: the Phase 1 LightGBM multiclass detector.
+#
+# `id` and `version` are read from Phase_1/outputs/09_model/model_card.json at
+# run time (src/detection_layer.py); the values below are the expected ones and
+# are cross-checked, so a Phase 1 retrain that changes the model identity fails
+# loudly here instead of being logged under a stale label.
+#
+# Earlier revisions of this file named a PyTorch binary classifier ("STAHN",
+# CICIoT2023). That is not the detector in this repository.
 model:
-  id: "stahn-phase1"
-  version: "phase1-submission"
+  id_source: "Phase_1/outputs/09_model/model_card.json:model_id_sha256"
+  expected_id: "fa8d2667cc39cea50abe78f813133ead89e9dea3a317da436c14dcfc41fbf820"
+  expected_version: "flat_tuned_tau-fa8d2667cc39"
+  architecture: "LightGBM multiclass, 7 coarse threat categories"
+  dataset: "NF-CSE-CIC-IDS2018-v2"
+  dataset_url: "https://staff.itee.uq.edu.au/marius/NIDS_datasets/"
+  # Enforce that alerts and provenance agree with the model card above.
+  verify_identity: true
 
-# Policy defaults are intentionally conservative. Their measured operating values
-# will be set after Phase 1 confidence-gate analysis is imported in Commit 3.
+# Anchoring policy lives in its own file so it can be versioned and tuned
+# independently of deployment wiring.
 anchoring:
   enabled: true
-  anchor_attack_only: true
-  confidence_threshold: 0.0
-  category_thresholds: {}
+  policy_file: "config/anchoring-policy.example.yaml"
+  # Merkle batch size. See the capacity note in the policy file.
+  batch_size: 100
 
 storage:
   backend: "local_content_addressed"
   root: ".phase2_runtime/evidence"
 
 agent:
-  id: "stahn-detector-agent-001"
+  id: "detection-agent-001"
   key_path: ".phase2_runtime/keys/detection_agent_ed25519.pem"
 
 ledger:
+  # MockLedger is the default so the pipeline runs with no Docker, Go or Fabric
+  # network. It reproduces the evidentiary semantics (append-only hash chain,
+  # signature verification, provenance lookup) but NOT distributed consensus,
+  # endorsement policy, or real commit latency. Any figure produced with
+  # `enabled: false` must be reported as a software-layer measurement.
   backend: "fabric"
   enabled: false
   channel: "securitylogchannel"

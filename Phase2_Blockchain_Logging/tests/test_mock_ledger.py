@@ -78,7 +78,7 @@ def test_model_provenance_roundtrip():
     ledger = MockLedger(authorised_agents={identity.agent_id: identity.public_key_hex()})
     provenance = {
         "contract_version": "1.0.0",
-        "model_id": "stahn-phase1",
+        "model_id": "fa8d2667cc39cea50abe78f813133ead89e9dea3a317da436c14dcfc41fbf820",
         "model_digest": "b" * 64,
         "anchored_at": "2026-09-15T18:00:00.000Z",
     }

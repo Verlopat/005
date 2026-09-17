@@ -5,6 +5,33 @@ validates its exported alerts, runs Phase 2 evidence logging, and replays the
 same events through Phase 3 synchronous/asynchronous experiments. It does not
 invoke the removed STAHN submission or silently substitute predictions.
 
+## Running the phases
+
+The phases are **cumulative**: each command is a superset of the one before it,
+because they form a pipeline rather than a menu.
+
+```bash
+python main.py phase1     # Phase 1 only
+python main.py phase2     # Phase 1, then Phase 2
+python main.py phase3     # Phase 1, then Phase 2, then Phase 3
+python main.py all        # same as phase3
+```
+
+That ordering is enforced, not merely suggested. Phase 2 consumes the alert
+stream and model provenance Phase 1 exports; Phase 3 replays the events Phase 2
+anchored. Each boundary is checked by digest, so a stale or mismatched handoff
+fails loudly instead of silently producing numbers.
+
+To run one phase in isolation, add `--only`:
+
+```bash
+python main.py phase2 --only                      # Phase 2 alone
+python main.py phase3 --only --run-dir runs/expt  # replay a completed Phase 2 run
+```
+
+`--only phase3` requires `--run-dir` pointing at a finished Phase 2 run, since it
+has no Phase 2 output of its own to consume.
+
 ## Quick start
 
 Use Python 3.11 or newer. The launcher works from any current directory.

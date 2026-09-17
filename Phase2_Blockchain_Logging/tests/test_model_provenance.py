@@ -28,7 +28,7 @@ def test_build_provenance_record_end_to_end(tmp_path):
     model_path.write_bytes(b"weights")
     record = build_provenance_record(
         model_path=model_path,
-        model_id="stahn-phase1",
+        model_id="fa8d2667cc39cea50abe78f813133ead89e9dea3a317da436c14dcfc41fbf820",
         version_label="v1",
         feature_order=["Rate"],
         label_order=["BENIGN", "ATTACK"],

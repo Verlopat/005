@@ -6,7 +6,6 @@ No legacy STAHN fallback. Smoke fixtures are explicitly synthetic.
 from __future__ import annotations
 
 import argparse
-import hashlib
 import json
 import statistics
 import sys
@@ -16,25 +15,26 @@ from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1]
 sys.path[:0] = [str(ROOT), str(ROOT / "Phase2_Blockchain_Logging"),
-                str(ROOT / "Phase3_Performance_Optimization"),
-                str(ROOT / "Phase_1" / "outputs" / "10_contract")]
+                str(ROOT / "Phase3_Performance_Optimization")]
 import jsonschema
-from canonical_hash import event_hash, fmt
-from src.alert_builder import build_alert_from_oracle_response
+from src.alert_builder import build_alert_from_phase1_alert
 from src.anchoring_policy import AnchoringDecision
 from src.audit import compliance_report
-from src.digest import digest_event
+from src.detection_layer import THREAT_CATEGORIES
 from src.evidence_store import LocalContentAddressedStore, put_json
 from src.ledger.mock_ledger import MockLedger
-from src.model_provenance import build_provenance_record, sha256_file
+from src.model_provenance import (build_provenance_from_phase1,
+                                  build_provenance_record, sha256_file)
+from src.phase1_contract import event_hash, feature_digest, verify_alert
 from src.pipeline import Phase2Pipeline
 from src.signing import load_or_create_agent_identity
 
 CONTRACT = ROOT / "Phase_1" / "outputs" / "10_contract"
 MODEL = ROOT / "Phase_1" / "outputs" / "09_model"
-CATEGORIES = {"Benign": "BENIGN", "Bot": "Botnet", "Web Attacks": "Web-based",
-              "DDoS": "DDoS", "DoS": "DoS", "BruteForce": "BruteForce",
-              "Infiltration": "Infiltration"}
+
+# Phase 2's contract now uses Phase 1's own seven coarse categories, so no
+# category translation happens anywhere in the handoff.
+CATEGORIES = tuple(THREAT_CATEGORIES)
 
 
 def save(path: Path, value) -> None:
@@ -65,50 +65,45 @@ def read_alerts(path: Path, limit: int) -> list[dict]:
 
 
 def feature_hash(features: dict) -> str:
-    text = "|".join(f"{key}={fmt(features[key])}" for key in sorted(features))
-    return hashlib.sha256(text.encode("utf-8")).hexdigest()
+    """Phase 1's feature digest, via Phase 2's verified re-implementation."""
+    return feature_digest(features)
 
 
 def validate_alert(alert: dict, schema: dict) -> None:
+    """Validate against Phase 1's own schema, then its frozen digest rules."""
     jsonschema.Draft202012Validator(schema, format_checker=jsonschema.FormatChecker()).validate(alert)
-    if not alert.get("features"):
-        raise ValueError("Full alerts with features are required, not on-chain projections")
-    if feature_hash(alert["features"]) != alert["feature_digest"]:
-        raise ValueError("Phase 1 feature digest mismatch")
-    if event_hash(alert) != alert["event_hash"]:
-        raise ValueError("Phase 1 event hash mismatch")
-    if (alert["verdict"] == "NORMAL") != (alert["threat_class"] == "Benign"):
-        raise ValueError("Inconsistent verdict and threat class")
+    verify_alert(alert)
 
 
 def adapt(alert: dict, model_digest: str, *, synthetic: bool = False) -> dict:
-    """Retain P(attack), not P(predicted class); source anchor flag is authoritative."""
-    event = build_alert_from_oracle_response(
-        {"is_attack": alert["verdict"] == "ANOMALY",
-         "confidence_score": alert["confidence"], "model_version": alert["model_version"]},
-        list(alert["features"]), list(alert["features"].values()),
-        "nf-cse-cic-ids2018-lightgbm" if not synthetic else "SYNTHETIC-SMOKE",
-        model_digest, alert["cloud_resource_id"] or "unknown-resource",
-        alert["inference_latency_ms"],
-        source_address=address(alert.get("src_ip"), alert.get("src_port")),
-        destination_address=address(alert.get("dst_ip"), alert.get("dst_port")),
-        threat_category=CATEGORIES[alert["threat_class"]],
-        feature_attributions=[{"feature": item["feature"], "contribution": item["shap"]}
-                              for item in alert.get("top_contributing_features", [])],
-        event_id=alert["event_id"], timestamp=alert["timestamp"],
+    """Adapt a Phase 1 alert via Phase 2's production adapter.
+
+    Confidence stays P(attack) rather than P(argmax class), severity and the
+    anchoring decision stay the producer's, and the producer's event_hash is
+    re-verified inside the adapter.
+    """
+    return build_alert_from_phase1_alert(
+        alert,
+        model_id="SYNTHETIC-SMOKE" if synthetic else model_id_for(alert),
+        model_digest=model_digest,
+        calibration_method="none" if synthetic else "isotonic",
+        expected_calibration_error=None if synthetic else phase1_ece(),
     )
-    event["severity"] = {"NONE": "informational", "LOW": "low", "MEDIUM": "medium",
-                         "HIGH": "high", "CRITICAL": "critical"}[alert["severity"]]
-    event["calibration"] = {"is_calibrated": not synthetic,
-                            "method": "none" if synthetic else "isotonic"}
-    event["payload_digest"] = digest_event(event)
-    return event
 
 
-def address(ip, port) -> str | None:
-    if ip is None:
+def model_id_for(alert: dict) -> str:
+    card_path = MODEL / "model_card.json"
+    if card_path.is_file():
+        return str(json.loads(card_path.read_text(encoding="utf-8"))["model_id_sha256"])
+    return alert["model_version"]
+
+
+def phase1_ece() -> float | None:
+    from src.detection_layer import model_identity
+    try:
+        return model_identity().expected_calibration_error
+    except Exception:  # noqa: BLE001 - model card absent
         return None
-    return str(ip) if port is None else f"[{ip}]:{port}"
 
 
 class SourceAnchorPolicy:
@@ -124,6 +119,14 @@ class SourceAnchorPolicy:
 
 
 def fixture(limit: int) -> list[dict]:
+    """Explicitly-synthetic Phase 1-shaped alerts for the smoke path.
+
+    Severity comes from Phase 1's own severity map rather than a flat 'HIGH', so
+    the fixture exercises the real per-category severities (notably Infiltration
+    CRITICAL and BruteForce MEDIUM) instead of a shape Phase 1 never emits.
+    """
+    from src.detection_layer import load_severity_map
+    severities = load_severity_map()
     features = json.loads((MODEL / "model_card.json").read_text())["features"]
     rows = []
     for i in range(limit):
@@ -133,7 +136,7 @@ def fixture(limit: int) -> list[dict]:
             "event_id": str(uuid.uuid5(uuid.NAMESPACE_URL, f"synthetic-smoke/{i}")),
             "schema_version": "1.0.0", "timestamp": "2026-01-01T00:00:00.000Z",
             "verdict": "NORMAL" if category == "Benign" else "ANOMALY",
-            "threat_class": category, "severity": "NONE" if category == "Benign" else "HIGH",
+            "threat_class": category, "severity": severities[category],
             "confidence": 0.1 if category == "Benign" else 0.99,
             "model_version": "SYNTHETIC-SMOKE-NOT-A-DETECTOR",
             "cloud_resource_id": f"synthetic-{i % 5}",
@@ -172,15 +175,24 @@ def prepare(args) -> tuple[list[dict], dict]:
         if set(alert["features"]) != set(card["features"]):
             raise ValueError("Alert features do not match model card")
     save_lines(source, rows)
-    provenance = build_provenance_record(
-        artifact, "SYNTHETIC-SMOKE" if synthetic else "nf-cse-cic-ids2018-lightgbm",
-        card["model_version"], card["features"], card["labels"],
-        f"sha256:{sha256_file(artifact)}", rows[0]["timestamp"],
-        hyperparameters=card.get("hyperparameters", {}),
-        thresholds={"class_thresholds": card.get("class_thresholds", {}),
-                    "anchoring_gate": card.get("anchoring_gate", {})},
-        training_summary={"synthetic": synthetic, "source_model_card": card},
-    ).to_dict()
+    if synthetic:
+        # Explicitly synthetic provenance: a fixture identity, never Phase 1's.
+        provenance = build_provenance_record(
+            artifact, "SYNTHETIC-SMOKE", card["model_version"],
+            card["features"], card["labels"],
+            f"sha256:{sha256_file(artifact)}", rows[0]["timestamp"],
+            hyperparameters={},
+            thresholds={},
+            training_summary={"dataset": "SYNTHETIC FIXTURE (no dataset)",
+                              "record_count": 0,
+                              "reported_metrics": {"note": "fixture; no measurement"}},
+        ).to_dict()
+    else:
+        # Read entirely from Phase 1's model card, so the anchored record
+        # describes the detector that actually produced these alerts.
+        provenance = build_provenance_from_phase1(
+            rows[0]["timestamp"], artifact_path=artifact
+        ).to_dict()
     metadata = {
         "adapter_version": "1.0.0", "synthetic": synthetic, "backend": "MockLedger",
         "source_alerts_sha256": sha256_file(source),

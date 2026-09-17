@@ -7,15 +7,11 @@ from the repository root for the current `Phase_1` exports. Use `--mode smoke`
 for a clearly synthetic test without trained artifacts. See the root README
 for the validated adapter and run-manifest format.
 
-The older STAHN/CICIoT2023 demos and paper reports described below are historical
-and are not the current integrated launcher's execution path.
-
-Phase 2 establishes the integrity and provenance layer for the STAHN
-intrusion-detection system in `../Phase1_Submission`, implementing
-**Objective 2** of the project (see `Research_Objectives_Revised.docx`).
-Phase 1 classifies traffic; Phase 2 creates cryptographically verifiable,
-tamper-evident evidence of selected detection events and makes that
-evidence independently auditable.
+Phase 2 establishes the integrity and provenance layer for the Phase 1
+intrusion-detection layer in `../Phase_1`, implementing **Objective 2** of the
+project (see `Research_Objectives_Revised.docx`). Phase 1 classifies traffic;
+Phase 2 creates cryptographically verifiable, tamper-evident evidence of
+selected detection events and makes that evidence independently auditable.
 
 ## Status: Objective 2 complete for this phase
 
@@ -27,23 +23,68 @@ use once a suitable host is available — see "Two deployment targets"
 below. Load testing, asynchronous Kafka pipelines, and comparative
 benchmarking are **Objective 3** and are deliberately not built here.
 
-## A note on Phase 1 alignment
+## The detection layer of record
 
-`Research_Objectives_Revised.docx` describes Objective 1's *registered,
-revised* detection layer (a calibrated LightGBM cascade on
-NF-CSE-CIC-IDS2018-v2, seven-category classification, isotonic
-calibration). The code actually delivered in `../Phase1_Submission`
-(`blockchain_handoff_document.md`, `blockchain_oracle_api.py`) is the
-STAHN binary classifier on CICIoT2023 — the earlier architecture the
-revision note says was discontinued. Phase 2's frozen contract
-(`contracts/alert_event.schema.json`) is written to the *richer, revised*
-specification, and `src/alert_builder.py` is the adapter that lets the
-*actually delivered* STAHN oracle populate that contract honestly today
-(`calibration.is_calibrated: false`, `threat_category: "Other"` where the
-binary classifier cannot resolve a finer category) without blocking on a
-Phase 1 rewrite. When/if Phase 1 is upgraded to the registered
-LightGBM cascade, no Phase 2 code changes — only `alert_builder.py`'s
-adapter logic becomes simpler.
+Phase 2 and Phase 3 are aligned to one detector, and it is the one in `../Phase_1`:
+
+| Property | Value | Source |
+|---|---|---|
+| Architecture | LightGBM multiclass, 7 coarse threat categories | `Phase_1/outputs/09_model/model_card.json` |
+| Dataset | NF-CSE-CIC-IDS2018-v2, 18,893,708 NetFlow records ([distribution](https://staff.itee.uq.edu.au/marius/NIDS_datasets/)) | Phase 1 `README.md`, `config.py` |
+| Features | 25, identifiers excluded by construction | model card |
+| Calibration | isotonic, fitted on the validation fold, measured ECE 8.14e-05 | `outputs/08_calibration_icr/` |
+| Macro-F1 / accuracy | 0.8172 / 0.9954 (held-out test fold) | `outputs/07_metrics/metrics_table.csv` |
+| Anchoring gate | tau = 0.9997655, ICR 0.9568, 88.6% write reduction | model card `anchoring_gate` |
+
+No file in Phase 2 or Phase 3 restates these values. They are read at run time
+from Phase 1's own committed artefacts by `src/detection_layer.py`, so a Phase 1
+retrain cannot leave a stale figure behind in a downstream report. Phase 1 itself
+is never modified by these phases.
+
+### What changed, and why
+
+Earlier revisions of Phase 2 and Phase 3 were written against a different
+detector: a PyTorch binary classifier ("STAHN") trained on CICIoT2023 and
+reported at 98.62% accuracy. That is not the detector in this repository -
+different architecture, different dataset, different label space - so any figure
+inherited from it was not a statement about this project. Concretely, the
+following were corrected:
+
+- The alert contract admitted CICIoT2023 categories (`Mirai`, `Recon`,
+  `Spoofing`, `Web-based`, `Other`) that the deployed detector cannot emit. The
+  enum is now exactly Phase 1's seven categories, and the contract version is
+  bumped to **2.0.0**.
+- Every event recorded `calibration.is_calibrated: false`. Phase 1 *is*
+  isotonic-calibrated, and Objective 3's anchoring gate is only defensible
+  against a calibrated score, so this understated the work.
+- The provenance record named `stahn-phase1` / `stahn_v1_98.62_acc` and a
+  CICIoT2023 training summary. It now carries Phase 1's own `model_id_sha256`,
+  version label, feature order, label order, hyperparameters, per-class
+  thresholds and dataset.
+- The comparative benchmark reported this framework's accuracy as 0.9862 with
+  attack precision 0.9959. Those were the other model's numbers.
+- Phase 3's load generator read a `CICIoT2023_Sample.csv` that does not exist in
+  this repository, which broke 11 tests.
+
+### Two digests, deliberately
+
+Phase 1 freezes its own cross-layer digest (`event_hash`: fixed field order,
+pipe-joined, six-decimal floats) and its `CONTRACT.md` designates that value for
+on-chain commitment. Phase 2 therefore **re-implements Phase 1's digest rules
+independently** in `src/phase1_contract.py` and verifies itself against Phase 1's
+own fixed test vectors (currently 6/6 reproduced). Importing Phase 1's function
+instead would only prove that a function equals itself; two independent
+implementations agreeing on shared vectors is the evidentiary claim Objective 2
+needs.
+
+So each event carries two digests with distinct scopes, both verified:
+
+| Digest | Scope | Computed by | Anchored |
+|---|---|---|---|
+| `detection_contract.event_hash` | Phase 1's frozen field set | producer, re-verified by Phase 2 | yes |
+| `payload_digest` | Phase 2's canonical-JSON envelope | Phase 2, mirrored by the Go chaincode | recorded |
+
+A corrupted alert is rejected at ingestion rather than anchored.
 
 ## Evidence model
 
@@ -120,12 +161,19 @@ notes' section, which should be read before citing a number in a paper.
 python3 Phase2_Blockchain_Logging/scripts/run_phase2_demo.py
 ```
 
-Reads real rows from `../Phase1_Submission/CICIoT2023_Sample.csv`, builds
-contract-conformant alerts, runs them through the full pipeline against a
-local `MockLedger`, prints an Integrity Coverage Ratio sweep, and ends with
-a compliance report. If `torch` and the model artifact are available it
-calls the real STAHN model; otherwise it uses a clearly-labelled simulated
-oracle so the rest of the pipeline is still exercised honestly.
+Consumes the alerts Phase 1 already emitted
+(`../Phase_1/outputs/10_contract/sample_alerts.jsonl`), verifies each one's
+producer digest, runs them through the full pipeline against a local
+`MockLedger`, prints an Integrity Coverage Ratio sweep and the effect of
+class-aware gate flooring, and ends with a compliance report.
+
+Phase 2 does not re-run inference: re-deriving a verdict here would duplicate
+Phase 1 while risking a different answer, and Objective 2's claims are about
+evidence, not detection. If Phase 1's alert stream is absent - it is excluded
+from version control by `Phase_1/.gitignore`, so a fresh clone will not have it -
+the script falls back to explicitly-synthetic Phase 1-shaped alerts whose
+`model_version` is `SYNTHETIC-FIXTURE-NOT-A-DETECTION`, and says so. The evidence
+pipeline is exercised either way; only the detection figures differ.
 
 ```bash
 python3 Phase2_Blockchain_Logging/scripts/tamper_demo.py

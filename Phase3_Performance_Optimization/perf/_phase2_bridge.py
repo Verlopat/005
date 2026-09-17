@@ -16,7 +16,10 @@ from pathlib import Path
 PHASE3_ROOT = Path(__file__).resolve().parent.parent
 REPO_ROOT = PHASE3_ROOT.parent
 PHASE2_ROOT = REPO_ROOT / "Phase2_Blockchain_Logging"
-PHASE1_ROOT = REPO_ROOT / "Phase1_Submission"
+#: The Phase 1 detection layer. Named `Phase_1` in this repository; an earlier
+#: `Phase1_Submission` directory described a different detector (PyTorch binary
+#: classifier on CICIoT2023) and no longer exists.
+PHASE1_ROOT = REPO_ROOT / "Phase_1"
 
 
 def ensure_phase2_importable() -> Path:

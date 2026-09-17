@@ -49,9 +49,10 @@ func canonicalValue(v interface{}) (string, error) {
 		return canonicalNumber(val)
 	case float64:
 		// encoding/json without UseNumber() decodes all JSON numbers as
-		// float64; canonicalNumber handles both integral and fractional
-		// values per spec rule 5.
-		return canonicalNumber(json.Number(strconv.FormatFloat(val, 'g', -1, 64)))
+		// float64. Format directly rather than round-tripping through a
+		// json.Number, because a 'g'-formatted intermediate would already have
+		// discarded the trailing ".0" that an integral float must keep.
+		return canonicalFloat(val), nil
 	case map[string]interface{}:
 		return canonicalObject(val)
 	case []interface{}:
@@ -158,8 +159,63 @@ func canonicalNumber(n json.Number) (string, error) {
 	if math.IsNaN(f) || math.IsInf(f, 0) {
 		return "", fmt.Errorf("NaN/Infinity is forbidden in a canonicalised alert event: %v", f)
 	}
-	// 'g', -1 selects the shortest decimal representation that round-trips
-	// to the same float64, matching Python's repr(float) semantics used by
-	// src/canonical.py.
-	return strconv.FormatFloat(f, 'g', -1, 64), nil
+	return canonicalFloat(f), nil
+}
+
+// canonicalFloat renders a float64 exactly as Python's repr(float) does, which
+// is what src/canonical.py emits and therefore what the shared digest depends
+// on.
+//
+// strconv.FormatFloat(f, 'g', -1, 64) is NOT equivalent and must not be used
+// here. Two divergences matter:
+//
+//  1. Integral values. Python renders 6.0 as "6.0"; Go's 'g' renders it as "6".
+//     Feature vectors are full of integral floats (byte counts, packet counts,
+//     protocol numbers), so this is the common case, not an edge case.
+//  2. The decimal/exponent threshold. Python uses decimal notation when the
+//     decimal exponent lies in [-4, 15] and exponent notation outside it
+//     (1e15 -> "1000000000000000.0", 1e16 -> "1e+16", 1e-5 -> "1e-05").
+//     Go's 'g' switches on a different criterion and would render 1e15 as
+//     "1e+15".
+//
+// Either divergence produces a different canonical string, hence a different
+// SHA-256, hence a Go peer that rejects a digest the Python producer computed.
+func canonicalFloat(f float64) string {
+	if f == 0 {
+		if math.Signbit(f) {
+			return "-0.0"
+		}
+		return "0.0"
+	}
+
+	// Shortest round-tripping form in scientific notation, used only to read
+	// off the decimal exponent exactly. Deriving it via math.Log10 would be
+	// wrong at the boundaries.
+	sci := strconv.FormatFloat(f, 'e', -1, 64)
+	epos := strings.IndexByte(sci, 'e')
+	if epos < 0 {
+		return sci
+	}
+	exp, err := strconv.Atoi(sci[epos+1:])
+	if err != nil {
+		return sci
+	}
+
+	if exp >= -4 && exp <= 15 {
+		s := strconv.FormatFloat(f, 'f', -1, 64)
+		if !strings.Contains(s, ".") {
+			// Python always keeps a fractional part in decimal notation.
+			s += ".0"
+		}
+		return s
+	}
+
+	// Exponent notation, Python style: signed exponent, at least two digits.
+	mantissa := sci[:epos]
+	sign := "+"
+	if exp < 0 {
+		sign = "-"
+		exp = -exp
+	}
+	return fmt.Sprintf("%se%s%02d", mantissa, sign, exp)
 }

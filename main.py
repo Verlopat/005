@@ -40,8 +40,29 @@ def positive(value: str) -> int:
 
 
 def parser() -> argparse.ArgumentParser:
-    result = argparse.ArgumentParser(description=__doc__)
-    result.add_argument("phase", choices=(*PHASES, "all"))
+    result = argparse.ArgumentParser(
+        description=__doc__,
+        formatter_class=argparse.RawDescriptionHelpFormatter,
+        epilog="""\
+Phases are cumulative, so each command is a superset of the one before it:
+
+  python main.py phase1     run Phase 1 only
+  python main.py phase2     run Phase 1, then Phase 2
+  python main.py phase3     run Phase 1, then Phase 2, then Phase 3
+  python main.py all        same as phase3
+
+That ordering is enforced, not merely suggested: Phase 2 consumes the alert
+stream and provenance Phase 1 exports, and Phase 3 replays the events Phase 2
+anchored, with a digest check at each boundary.
+
+Use --only to run a single phase in isolation (--only phase3 additionally needs
+--run-dir pointing at a completed Phase 2 run).
+""",
+    )
+    result.add_argument("phase", choices=(*PHASES, "all"),
+                        help="highest phase to run; earlier phases run first unless --only")
+    result.add_argument("--only", action="store_true",
+                        help="run just the named phase instead of every phase up to it")
     result.add_argument("--mode", choices=("existing", "train", "smoke"), default="existing",
                         help="existing artifacts (default), full training, or synthetic smoke test")
     result.add_argument("--run-dir", type=Path, help="new output directory; phase3 reuses a phase2 run")
@@ -59,7 +80,27 @@ def parser() -> argparse.ArgumentParser:
 
 
 def selected_phases(args) -> tuple[str, ...]:
-    return PHASES if args.phase == "all" else (args.phase,)
+    """Phases to run, cumulative unless ``--only`` was given.
+
+    ``phase2`` means "Phase 1 then Phase 2", because the phases form a pipeline
+    rather than a menu: running Phase 2 against a stale handoff is exactly the
+    reproducibility failure the digest checks exist to prevent.
+    """
+    if args.phase == "all":
+        return PHASES
+    if args.only:
+        return (args.phase,)
+    return PHASES[: PHASES.index(args.phase) + 1]
+
+
+def resumes_previous_run(args) -> bool:
+    """True when the plan consumes a previous run's Phase 2 output.
+
+    Only possible with ``--only phase3``; a cumulative run produces that output
+    itself earlier in the same run directory.
+    """
+    selected = selected_phases(args)
+    return "phase3" in selected and "phase2" not in selected
 
 
 def preflight(args) -> list[Path]:
@@ -74,7 +115,7 @@ def preflight(args) -> list[Path]:
             ROOT / "Phase_1" / "outputs" / "09_model" / "detector_bundle.joblib",
             ROOT / "Phase_1" / "outputs" / "09_model" / "model_card.json",
         ]
-    if args.phase == "phase3":
+    if resumes_previous_run(args):
         required += [args.run_dir / "phase2" / name for name in
                      ("events.jsonl", "handoff.json", "mapping.json", "results.json")]
     missing = [str(p) for p in required if not p.is_file()]
@@ -152,10 +193,11 @@ def main(argv=None) -> int:
         cli.error("--install and --python are mutually exclusive")
     if args.alerts and args.mode != "existing":
         cli.error("--alerts is only supported with --mode existing")
-    if args.phase == "phase3" and args.run_dir is None:
-        cli.error("standalone phase3 requires --run-dir pointing to a completed phase2 run")
-    if args.mode == "train" and args.phase not in ("phase1", "all"):
-        cli.error("--mode train requires phase1 or all")
+    if resumes_previous_run(args) and args.run_dir is None:
+        cli.error("--only phase3 requires --run-dir pointing to a completed phase2 run")
+    if args.mode == "train" and "phase1" not in selected_phases(args):
+        cli.error("--mode train trains the Phase 1 detector, so phase1 must be in the "
+                  "plan; drop --only or select phase1")
     args.run_dir = (args.run_dir or ROOT / "runs" /
                     datetime.now(timezone.utc).strftime("%Y%m%dT%H%M%S%fZ")).resolve()
     args.alerts = (args.alerts or ROOT / "Phase_1" / "outputs" /
@@ -175,7 +217,7 @@ def main(argv=None) -> int:
         if args.check:
             print("Prerequisite files present. This is not a validation of research results.")
             return 0
-        if args.phase == "phase3":
+        if resumes_previous_run(args):
             if (args.run_dir / "phase3").exists():
                 raise FileExistsError("phase3 output already exists; use a fresh phase2 run")
         else:

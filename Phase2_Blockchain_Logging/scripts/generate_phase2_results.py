@@ -35,14 +35,13 @@ from pathlib import Path
 
 PHASE2_ROOT = Path(__file__).resolve().parent.parent
 REPO_ROOT = PHASE2_ROOT.parent
-PHASE1_DIR = REPO_ROOT / "Phase1_Submission"
+PHASE1_DIR = REPO_ROOT / "Phase_1"
 OUTPUTS_DIR = PHASE2_ROOT / "outputs"
 sys.path.insert(0, str(PHASE2_ROOT))
 
-import pandas as pd  # noqa: E402
 import yaml  # noqa: E402
 
-from src.alert_builder import build_alert_from_oracle_response  # noqa: E402
+from src.alert_builder import build_alert_from_phase1_alert  # noqa: E402
 from src.anchoring_policy import AnchoringPolicy, integrity_coverage_ratio  # noqa: E402
 from src.audit import audit_event, compliance_report  # noqa: E402
 from src.canonical import canonicalise  # noqa: E402
@@ -50,84 +49,49 @@ from src.digest import digest_bytes  # noqa: E402
 from src.evidence_store import LocalContentAddressedStore, put_json  # noqa: E402
 from src.ledger.base import now_utc_iso  # noqa: E402
 from src.ledger.mock_ledger import MockLedger  # noqa: E402
+from src.detection_layer import (  # noqa: E402
+    SAMPLE_ALERTS_PATH,
+    THREAT_CATEGORIES,
+    DetectionLayerUnavailable,
+    model_identity,
+    per_class_confidence,
+)
 from src.merkle import required_batch_factor_for_target_tps  # noqa: E402
-from src.model_provenance import build_provenance_record  # noqa: E402
+from src.model_provenance import build_provenance_from_phase1  # noqa: E402
+from src.phase1_contract import (  # noqa: E402
+    SYNTHETIC_MARKER,
+    load_alerts,
+    synthetic_alert,
+    verify_against_phase1_vectors,
+)
 from src.pipeline import Phase2Pipeline  # noqa: E402
 from src.signing import generate_agent_identity  # noqa: E402
 
 import hashlib  # noqa: E402
 
+AGENT_ID = "detection-agent-001"
 
-HARD_CATEGORY = "Spoofing"  # deliberately the low-confidence category in this simulation
-# (chosen because it is rare-but-present in a 2,000-row sample, unlike BruteForce/Web-based
-# which barely occur in that many rows of CICIoT2023_Sample.csv — see the value_counts check
-# this default was picked against),
-# illustrating (without claiming to reproduce) the class-dependent confidence gap Objective 1
-# measures for Infiltration on the registered dataset — see docs/evidence_lifecycle.md.
+#: Phase 1's genuinely hard category: measured mean calibrated confidence 0.303
+#: on the held-out fold (outputs/08_calibration_icr/icr_per_class.csv), against
+#: >0.99 for every other attack category. This is the class-dependent confidence
+#: gap the anchoring policy's class-aware flooring exists to address - see
+#: docs/evidence_lifecycle.md.
+HARD_CATEGORY = "Infiltration"
 
 
-def simulated_oracle(row_index: int, true_label: int, attack_class: str | None) -> dict:
-    """Deterministic, clearly-labelled stand-in for the real STAHN oracle, used only
-    when torch/the model artifact are unavailable. Confidence is high and separable
-    for most attack categories (matching the real model's reported 99.59% attack
-    precision) with one deliberately harder category, so the Integrity Coverage
-    Ratio sweep this script produces tells a realistic story instead of pure noise.
-    This function's output is never presented as a real measurement — every event
-    it produces carries model_version '...-SIMULATED' and calibration.is_calibrated
-    is set to False by src/alert_builder.py.
+def phase1_inference_note(synthetic: bool) -> str:
+    """One sentence stating exactly where the alerts came from.
+
+    Phase 2 does not run the detector. It consumes what Phase 1 emitted, so the
+    report must say which stream was used rather than implying an inference pass
+    happened here.
     """
-    is_attack = bool(true_label == 1)
-    h = int(hashlib.sha256(f"row-{row_index}".encode()).hexdigest(), 16)
-    noise = (h % 1000) / 1000.0
-    if not is_attack:
-        confidence = 0.85 + noise * 0.149  # confident BENIGN verdicts
-    elif attack_class == HARD_CATEGORY:
-        confidence = 0.25 + noise * 0.40  # deliberately hard category
-    else:
-        confidence = 0.95 + noise * 0.049  # confident ATTACK verdicts, matching high reported precision
-    return {
-        "is_attack": is_attack,
-        "confidence_score": round(min(confidence, 0.999), 4),
-        "model_version": "stahn_v1_98.62_acc-SIMULATED",
-    }
-
-
-def try_real_inference():
-    try:
-        import torch  # noqa: F401
-    except ImportError:
-        return None
-    model_path = PHASE1_DIR / "stahn_model.pth"
-    if not model_path.is_file():
-        return None
-    sys.path.insert(0, str(PHASE1_DIR))
-    try:
-        from blockchain_oracle_api import STAHN  # type: ignore
-        import torch
-
-        device = torch.device("cpu")
-        model = STAHN().to(device)
-        model.load_state_dict(torch.load(model_path, map_location=device))
-        model.eval()
-    except Exception:
-        return None
-
-    def infer(features: list[float]) -> dict:
-        import torch as _torch
-
-        tensor_input = _torch.FloatTensor([features]).unsqueeze(2).to(device)
-        with _torch.no_grad():
-            outputs = model(tensor_input)
-            probs = _torch.softmax(outputs, dim=1)[:, 1].item()
-            prediction = int(_torch.argmax(outputs, dim=1).item())
-        confidence = probs if prediction == 1 else (1.0 - probs)
-        return {
-            "is_attack": bool(prediction == 1),
-            "confidence_score": round(confidence, 4),
-            "model_version": "stahn_v1_98.62_acc",
-        }
-
-    return infer
+    if synthetic:
+        return (f"SYNTHETIC Phase 1-shaped alerts (model_version={SYNTHETIC_MARKER}); "
+                "Phase 1's emitted alert stream was not present in this checkout, so "
+                "no detection figure in this report is a measurement.")
+    return (f"Real alerts emitted by Phase 1 stage 10 ({SAMPLE_ALERTS_PATH.name}), "
+            "digest-verified on ingestion by src/phase1_contract.py.")
 
 
 def percentile(values: list[float], p: float) -> float:
@@ -141,33 +105,49 @@ def percentile(values: list[float], p: float) -> float:
     return values[f] + (values[c] - values[f]) * (k - f)
 
 
-def build_events(df: pd.DataFrame, feature_cols: list[str], label_col: str, model_digest: str, infer) -> list[dict]:
-    events = []
-    for row_index, (_, row) in enumerate(df.iterrows()):
-        features = [float(row[c]) for c in feature_cols]
-        true_label = int(row[label_col]) if str(row[label_col]).strip().lstrip("-").isdigit() else (
-            0 if str(row[label_col]) == "BenignTraffic" else 1
+def load_phase1_alerts(limit: int, gate_tau: float) -> tuple[list[dict], bool]:
+    """Phase 1's emitted alerts, or explicitly-synthetic stand-ins.
+
+    Returns ``(alerts, synthetic)``. Phase 2 consumes the alerts Phase 1 already
+    produced rather than re-running inference: re-deriving a verdict here would
+    duplicate Phase 1 while risking a different answer, and Objective 2's claims
+    are about evidence, not detection.
+    """
+    if SAMPLE_ALERTS_PATH.is_file():
+        return load_alerts(SAMPLE_ALERTS_PATH, limit=limit), False
+
+    measured = per_class_confidence()
+    alerts = []
+    for index in range(limit):
+        category = THREAT_CATEGORIES[index % len(THREAT_CATEGORIES)]
+        if category == "Benign":
+            confidence = 0.02
+        else:
+            confidence = measured.get(category, {}).get("mean_confidence", 0.999)
+        alerts.append(
+            synthetic_alert(index, category, confidence,
+                            resource_id=f"cloud-res-bench-{index % 8:04d}",
+                            gate_tau=gate_tau)
         )
-        raw_category = row.get("attack_class") if "attack_class" in df.columns else None
-        oracle_response = infer(features) if infer is not None else simulated_oracle(row_index, true_label, raw_category)
-        # Guard against a false-positive misclassification (predicted ATTACK on a
-        # truly benign row, possible with real model inference): the ground-truth
-        # "Benign" label is not a valid threat_category for an ATTACK verdict, so
-        # fall back to "Other" (alert_builder's default) rather than emit an
-        # inconsistent, schema-violating combination.
-        category = raw_category if (oracle_response["is_attack"] and raw_category not in (None, "Benign")) else None
-        event = build_alert_from_oracle_response(
-            oracle_response=oracle_response,
-            feature_names=feature_cols,
-            feature_values=features,
-            model_id="stahn-phase1",
+    return alerts, True
+
+
+def build_events(alerts: list[dict], model_id: str, model_digest: str,
+                 calibrated: bool) -> list[dict]:
+    """Adapt Phase 1 alerts into Objective 2 evidence events.
+
+    The adapter re-verifies each alert's producer digest, so a corrupted alert is
+    rejected here rather than anchored.
+    """
+    return [
+        build_alert_from_phase1_alert(
+            alert,
+            model_id=model_id,
             model_digest=model_digest,
-            resource_id=f"i-bench-{row_index % 8:04d}",
-            inference_latency_ms=0.3,
-            threat_category=category,
+            calibration_method="isotonic" if calibrated else "none",
         )
-        events.append(event)
-    return events
+        for alert in alerts
+    ]
 
 
 def measure_canonical_digest_agreement() -> dict:
@@ -204,7 +184,7 @@ def measure_storage_overhead(events: list[dict], sample_size: int = 200) -> dict
             "severity": event["severity"],
             "calibrated_confidence": event["calibrated_confidence"],
             "model_digest": event["model"]["model_digest"],
-            "agent_id": "stahn-detector-agent-001",
+            "agent_id": AGENT_ID,
             "signature": "0" * 128,
             "timestamp": event["timestamp"],
             "transaction_id": "0" * 64,
@@ -250,7 +230,8 @@ def run_latency_and_throughput_benchmark(store, identity, events: list[dict], n:
 
 def main() -> None:
     parser = argparse.ArgumentParser(description="Generate the Objective 2 paper results report")
-    parser.add_argument("--num-events", type=int, default=2000, help="rows from CICIoT2023_Sample.csv to process")
+    parser.add_argument("--num-events", type=int, default=2000,
+                        help="Phase 1 alerts to process")
     parser.add_argument("--benchmark-events", type=int, default=500, help="events used for the latency/throughput micro-benchmark")
     parser.add_argument("--gate", type=float, default=0.95, help="anchoring confidence gate for the operational ICR run")
     args = parser.parse_args()
@@ -262,43 +243,37 @@ def main() -> None:
     print("Generating Objective 2 (Phase 2) results for the paper")
     print("=" * 78)
 
-    # --- load data & model provenance -------------------------------------------------
-    sample_csv = PHASE1_DIR / "CICIoT2023_Sample.csv"
-    df = pd.read_csv(sample_csv).head(args.num_events)
-    label_col = "label" if "label" in df.columns else "Label"
-    feature_cols = [c for c in df.columns if c not in ("label", "Label", "attack_class")]
-    model_path = PHASE1_DIR / "stahn_model.pth"
+    # --- detection layer, provenance, and alert ingestion -----------------------------
+    digest_agreement_phase1 = verify_against_phase1_vectors()
+    print(f"[*] Cross-layer digest agreement with Phase 1: "
+          f"{digest_agreement_phase1['vectors_agreeing']}/"
+          f"{digest_agreement_phase1['vectors_checked']} vectors reproduced independently.")
 
-    identity = generate_agent_identity("stahn-detector-agent-001")
+    detector = model_identity()
+    print(f"[*] Detection layer: {detector.architecture} on {detector.dataset}")
+    print(f"    macro-F1={detector.reported_metrics.get('macro_f1'):.4f} "
+          f"accuracy={detector.reported_metrics.get('accuracy'):.4f} "
+          f"calibration={detector.calibration_method} gate tau={detector.gate_tau:.7f}")
+
+    identity = generate_agent_identity(AGENT_ID)
     store = LocalContentAddressedStore(OUTPUTS_DIR / "_run_evidence")
 
     model_digest = "0" * 64
     provenance_record = None
-    if model_path.is_file():
-        provenance_record = build_provenance_record(
-            model_path=model_path,
-            model_id="stahn-phase1",
-            version_label="stahn_v1_98.62_acc",
-            feature_order=feature_cols,
-            label_order=["BENIGN", "ATTACK"],
-            artifact_content_address=f"local:{model_path.name}",
-            anchored_at=run_started_at,
-            training_summary={
-                "dataset": "CICIoT2023 (5,000,000 train / 100,001 test)",
-                "record_count": 5_000_000,
-                "reported_metrics": {"accuracy": 0.9862, "attack_precision": 0.9959, "benign_recall": 0.8629},
-            },
-        )
+    try:
+        # Every provenance field is read from Phase 1's model card, so the anchored
+        # record describes the detector that actually produced these alerts.
+        provenance_record = build_provenance_from_phase1(run_started_at)
         model_digest = provenance_record.model_digest
         print(f"[*] Model provenance computed: model_digest={model_digest[:16]}...")
-    else:
-        print("[!] stahn_model.pth not found; using a placeholder model_digest.")
+    except DetectionLayerUnavailable as exc:
+        print(f"[!] {exc}")
+        print("[!] Using a placeholder model_digest; provenance traceability is NOT demonstrated.")
 
-    infer = try_real_inference()
-    print(f"[*] Inference source: {'REAL STAHN model' if infer else 'SIMULATED oracle (torch/model unavailable in this environment)'}")
-
-    print(f"[*] Building {len(df)} contract-conformant alert events from CICIoT2023_Sample.csv ...")
-    events = build_events(df, feature_cols, label_col, model_digest, infer)
+    alerts, synthetic = load_phase1_alerts(args.num_events, detector.gate_tau)
+    print(f"[*] Alert source: {phase1_inference_note(synthetic)}")
+    print(f"[*] Adapting {len(alerts)} Phase 1 alerts into Objective 2 evidence events ...")
+    events = build_events(alerts, detector.model_id, model_digest, calibrated=not synthetic)
 
     # --- metric 6: canonical digest agreement -----------------------------------------
     print("[*] Checking canonical digest agreement (metric 6) ...")
@@ -448,7 +423,7 @@ def main() -> None:
                 f"Model provenance anchored and retrievable by model_digest={model_digest[:16]}...; "
                 f"every ATTACK alert's model.model_digest field matches the anchored record: {provenance_traceable}."
                 if provenance_record is not None
-                else "stahn_model.pth was not available in this run; provenance anchoring skipped."
+                else "Phase 1 exported model artifact unavailable in this run; provenance anchoring skipped."
             ),
             "status": "Met" if provenance_traceable else "NOT MET / SKIPPED",
         },
@@ -475,8 +450,14 @@ def main() -> None:
     report_lines.append("# Objective 2 — Phase 2 Results")
     report_lines.append("")
     report_lines.append(f"Generated: {run_started_at}")
-    report_lines.append(f"Sample: {len(events)} rows from `Phase1_Submission/CICIoT2023_Sample.csv`")
-    report_lines.append(f"Inference source: {'REAL STAHN model (stahn_model.pth via torch)' if infer else 'SIMULATED oracle — torch/model artifact unavailable in this environment'}")
+    report_lines.append(f"Sample: {len(events)} alerts from the Phase 1 detection layer "
+                        f"({detector.architecture}, {detector.dataset})")
+    report_lines.append(f"Alert source: {phase1_inference_note(synthetic)}")
+    report_lines.append(
+        f"Cross-layer digest agreement: Phase 2 independently reproduced "
+        f"{digest_agreement_phase1['vectors_agreeing']}/"
+        f"{digest_agreement_phase1['vectors_checked']} of Phase 1's frozen digest test vectors."
+    )
     report_lines.append("Ledger backend: `src/ledger/mock_ledger.py` (in-memory, hash-chained, tamper-evident). No Docker/Go/Fabric were available in the environment that generated this report; see the caveats inline below and `../network/` for the production Hyperledger Fabric deployment artifacts.")
     report_lines.append("")
     report_lines.append("## Success metrics (Objective 2)")
@@ -503,10 +484,12 @@ def main() -> None:
         "obtain a network-measured throughput and commit-latency figure."
     )
     report_lines.append(
-        "- The detection layer used to generate these alerts is the delivered Phase 1 STAHN binary classifier "
-        "(CICIoT2023), not the calibrated seven-category LightGBM cascade described in the revised Objective 1 "
-        "text (NF-CSE-CIC-IDS2018-v2). `calibration.is_calibrated=False` on every event reflects this honestly; "
-        "confidence values here are raw softmax scores, not isotonic-calibrated probabilities."
+        "- The detection layer for these alerts is the Phase 1 calibrated seven-category LightGBM "
+        "model on NF-CSE-CIC-IDS2018-v2, this project's detection layer of record. Confidence values "
+        "are isotonic-calibrated P(attack) carried through from Phase 1 unchanged, and "
+        "`calibration.is_calibrated` reflects that. Where this run used synthetic Phase 1-shaped "
+        "alerts (stated above), the evidence pipeline is still exercised end to end but the detection "
+        "figures are not measurements."
     )
     report_lines.append(
         "- Integrity Coverage Ratio figures are computed on this sample and detection layer and are not directly "
@@ -522,7 +505,8 @@ def main() -> None:
     raw_data = {
         "generated_at": run_started_at,
         "num_events_processed": len(events),
-        "inference_source": "real" if infer else "simulated",
+        "alert_source": "synthetic_phase1_shaped" if synthetic else "phase1_emitted",
+        "phase1_digest_agreement": digest_agreement_phase1,
         "benchmark": bench,
         "required_tx_per_sec_calc": {
             "peak_events_per_sec": 10_000,

@@ -10,18 +10,68 @@ where it does not, since partitioning strategy and class rebalancing
 account for a large share of the variance in reported figures on this
 dataset."
 
+## Matched-dataset detection comparison
+
+The detection layer is evaluated on **NF-CSE-CIC-IDS2018-v2**, and published
+results exist on that same dataset, so the detection half of the comparison *is*
+matched on dataset. Those rows are marked `matched=yes` in the generated table
+and are collated in Table 10 of ["An IoT intrusion detection framework based on
+feature selection and large language models fine-tuning", *Scientific Reports*
+15:21158, 2025](https://www.nature.com/articles/s41598-025-08905-3):
+
+| System | Class | Weighted F1 | Accuracy |
+|---|---|---|---|
+| Nguyen et al., all features | binary | 0.995 | 0.995 |
+| Nguyen et al., all features | multiclass | 0.992 | not reported |
+| Sarhan et al. baseline, all features | binary | 0.889 | 0.891 |
+| FSLLM, 9 features | multiclass | 0.988 | 0.988 |
+| **This framework** | multiclass (7) | **0.9942** | **0.9954** |
+| **This framework** | binary view | **0.9809** | **0.9954** |
+
+**Which F1 is being compared matters, and is the single most important caveat
+in this document.** Every published figure above is a *weighted* F1, which on a
+corpus that is ~88% benign is dominated by the benign class. This project targets
+*macro* F1 (0.8172), which weights the 665-flow Web Attacks class equally with
+the 278,227-flow DDoS class. Those two numbers are not comparable:
+
+- Comparing this project's macro F1 (0.8172) against a published weighted F1
+  (0.99x) **understates** this work by comparing two different metrics.
+- Reporting only the weighted F1 (0.9942) **overstates** class-balanced
+  performance and hides the genuinely hard classes.
+
+The generated table therefore emits three own-framework rows - weighted, macro
+and binary - and labels each with its `F1 type`. Cite the weighted row against
+these baselines, and cite the macro row as this project's own optimisation
+target, with the distinction stated.
+
+A further difference: this project splits by **capture order without shuffling**
+and downsamples benign traffic in the training fold only. The published rows
+generally do not state whether their splits preserve temporal order; a shuffled
+split on flow data can leak near-duplicate flows between folds and is
+optimistically biased relative to a time-ordered split. This is a reason to treat
+the gap between 0.889 and 0.995 in the published rows with caution as well.
+
 ## Protocol differences that must be stated explicitly
 
-None of the systems compared below were evaluated under an identical
-protocol to this project's Phase 1/2 pipeline. In particular:
+Beyond the dataset-matched detection rows above, the systems compared were not
+evaluated under an identical protocol to this project's pipeline. In particular:
 
-- **Dataset.** This project's delivered Phase 1 model is trained/tested on
-  CICIoT2023; the cited hybrid frameworks use InSDN (SmartSecChain-SDN),
-  BoT-IoT + CICIoT2023 (MBID), or CSE-CIC-IDS2018 (the Informatica
-  framework). Detection accuracy figures across different datasets are
-  **not** a controlled comparison of model quality — they are reported
-  side by side because Objective 3 explicitly calls for this comparison,
-  with this caveat stated up front rather than implied.
+- **Dataset, for the non-matched rows.** The cited hybrid frameworks use InSDN
+  (SmartSecChain-SDN), BoT-IoT + CICIoT2023 (MBID), or CSE-CIC-IDS2018 (the
+  Informatica framework), and the standalone-ML rows from the CICIoT2023 origin
+  paper are on that dataset. Detection figures across different datasets are
+  **not** a controlled comparison of model quality — they are reported side by
+  side because Objective 3 explicitly calls for this comparison, with the caveat
+  stated up front rather than implied. Rows carry their dataset in the table.
+- **Latency and storage are not matched at all.** This project's figures are
+  single-host, software-layer measurements against `MockLedger`, with no
+  consensus, endorsement or network cost. The cited systems ran real
+  Fabric/PoA/fog networks. A Pareto claim on latency requires deploying
+  `Phase2_Blockchain_Logging/network/` on a Fabric-capable host.
+- **Calibration has no published comparator.** This project reports
+  isotonic-calibrated confidence with measured ECE 8.14e-05. None of the cited
+  works reports a calibration error, so the anchoring-gate argument cannot be
+  compared against prior work at all.
 - **Blockchain platform and topology.** MBID uses a custom 3-shard fog
   architecture; SmartSecChain-SDN and the Informatica framework use small
   (1-2 peer) Fabric/Ganache networks; the two Fabric-only benchmarks use
@@ -30,8 +80,10 @@ protocol to this project's Phase 1/2 pipeline. In particular:
   source citation for the exact configuration before treating any two
   latency figures as comparable.
 - **What "this framework" measures.** This project's own row combines
-  Phase 1's reported test-fold accuracy (STAHN, CICIoT2023, 100,001
-  held-out packets — see `Phase1_Submission/blockchain_handoff_document.md`)
+  Phase 1's reported test-fold metrics (LightGBM multiclass on
+  NF-CSE-CIC-IDS2018-v2, 3,778,631 held-out flows — see
+  `Phase_1/outputs/07_metrics/metrics_table.csv` and
+  `Phase_1/outputs/09_model/model_card.json`)
   with Phase 2's measured software-layer commit latency against a mock
   ledger (`Phase2_Blockchain_Logging/outputs/phase2_results.json`), **not**
   a deployed Fabric network. It is the most protocol-transparent row in

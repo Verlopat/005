@@ -70,9 +70,20 @@ def test_all_categories_and_digests(index):
     event = stage.adapt(alert, "a" * 64, synthetic=True)
     target = stage.Phase2Pipeline._load_default_schema()
     stage.jsonschema.validate(event, target)
-    assert event["threat_category"] == stage.CATEGORIES[alert["threat_class"]]
+    # Phase 2's contract now uses Phase 1's own categories, so the handoff
+    # carries the threat class through unchanged rather than translating it.
+    assert event["threat_category"] == alert["threat_class"]
+    assert event["threat_category"] in stage.CATEGORIES
     assert event["calibrated_confidence"] == alert["confidence"]
     assert event["calibration"] == {"is_calibrated": False, "method": "none"}
+    # Severity is the producer's decision, only renamed.
+    assert event["severity"] == {
+        "NONE": "informational", "LOW": "low", "MEDIUM": "medium",
+        "HIGH": "high", "CRITICAL": "critical",
+    }[alert["severity"]]
+    # The producer's digest travels with the event and is verified on arrival.
+    assert event["detection_contract"]["event_hash"] == alert["event_hash"]
+    assert event["detection_contract"]["digest_verified_by_consumer"] is True
 
 
 @pytest.mark.parametrize("field", ["features", "confidence"])

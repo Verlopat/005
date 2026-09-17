@@ -23,11 +23,12 @@ from pathlib import Path
 PHASE2_ROOT = Path(__file__).resolve().parent.parent
 sys.path.insert(0, str(PHASE2_ROOT))
 
-from src.alert_builder import build_alert_from_oracle_response  # noqa: E402
+from src.alert_builder import build_alert_from_phase1_alert  # noqa: E402
 from src.anchoring_policy import AnchoringPolicy  # noqa: E402
 from src.audit import audit_event  # noqa: E402
 from src.evidence_store import LocalContentAddressedStore  # noqa: E402
 from src.ledger.mock_ledger import MockLedger  # noqa: E402
+from src.phase1_contract import synthetic_alert  # noqa: E402
 from src.pipeline import Phase2Pipeline  # noqa: E402
 from src.signing import generate_agent_identity  # noqa: E402
 
@@ -44,14 +45,9 @@ def main() -> None:
         policy = AnchoringPolicy.from_dict({"anchor_attack_only": True, "confidence_threshold": 0.0})
         pipeline = Phase2Pipeline(store, ledger, identity, policy, batch_size=1)
 
-        event = build_alert_from_oracle_response(
-            oracle_response={"is_attack": True, "confidence_score": 0.995, "model_version": "demo"},
-            feature_names=["Rate", "Protocol Type"],
-            feature_values=[16251.95, 6.0],
-            model_id="stahn-phase1",
-            model_digest="a" * 64,
-            resource_id="i-tamper-demo",
-            inference_latency_ms=0.4,
+        alert = synthetic_alert(0, "DDoS", 0.995, resource_id="cloud-res-tamper-demo")
+        event = build_alert_from_phase1_alert(
+            alert, model_id="tamper-demo", model_digest="a" * 64
         )
         result = pipeline.submit(event)
         print(f"[*] Anchored genuine event {event['event_id']} (decision={result.decision.value})")

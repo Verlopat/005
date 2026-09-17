@@ -1,198 +1,159 @@
 {
-  "generated_at": "2026-09-15T18:54:47.975Z",
-  "num_events": 1500,
+  "generated_at": "2026-09-17T19:25:56.796Z",
+  "num_events": 150,
+  "event_source": {
+    "source": "synthetic",
+    "phase1_alerts_path": null,
+    "replay_pool_size": null,
+    "model_version": "flat_tuned_tau-fa8d2667cc39-SYNTHETIC-LOAD",
+    "feature_count": 25,
+    "label_space": [
+      "Benign",
+      "DDoS",
+      "DoS",
+      "Bot",
+      "BruteForce",
+      "Infiltration",
+      "Web Attacks"
+    ],
+    "hard_category": "Infiltration",
+    "benign_share": 0.88,
+    "makes_detection_accuracy_claim": false
+  },
+  "comparative_protocol_notes": [
+    "Dataset: rows marked matched_dataset=True are evaluated on NF-CSE-CIC-IDS2018-v2, the same dataset as this framework's detection layer. Rows on CICIoT2023, InSDN, BoT-IoT or CSE-CIC-IDS2018 are prior work on different captures and are not like-for-like.",
+    "F1 definition: published NF-CSE-CIC-IDS2018-v2 results report weighted F1, which is dominated by the ~88% benign class. This framework's weighted F1 is the comparable figure; its macro F1 is lower by construction because it weights the 665-flow Web Attacks class equally with the 278,227-flow DDoS class. Both are reported.",
+    "Class granularity: several published rows are binary attack/benign, whereas this framework resolves seven coarse categories. The binary row is provided for that comparison.",
+    "Split protocol: this framework splits by capture order without shuffling (NF-CSE-CIC-IDS2018-v2), and applies benign downsampling to the training fold only. Published rows generally do not state whether their splits preserve temporal order, so a shuffled-split baseline may be optimistically biased relative to this one.",
+    "Latency and logging figures for this framework are single-host, software-layer measurements against MockLedger, not a deployed Hyperledger Fabric network, and carry no consensus or network cost. They are not comparable to the real-system Fabric measurements in the blockchain_only rows without that caveat.",
+    "Calibration: this framework reports isotonic-calibrated confidence with measured ECE 8.14e-05. None of the cited works reports a calibration error, so the anchoring-gate argument has no published comparator."
+  ],
   "e2e_latency": {
-    "n": 400,
-    "p50_ms": 52.99532413482666,
-    "p95_ms": 91.41063690185545,
-    "p99_ms": 94.83376979827881,
-    "max_ms": 95.58439254760742
+    "n": 150,
+    "p50_ms": 31.2802791595459,
+    "p95_ms": 57.73706436157226,
+    "p99_ms": 59.923503398895264,
+    "max_ms": 60.33062934875488
   },
   "instance_sweep": [
     {
       "num_instances": 100,
-      "events_processed": 150,
-      "elapsed_sec": 0.7330624500009435,
-      "throughput_eps": 204.6210387666248,
-      "latency_ms_p50": 4.757608499858179,
-      "latency_ms_p95": 4.917668749658333,
-      "cpu_utilisation_fraction": 1.0091001111652749,
-      "rss_mb_peak": 332.46484375
+      "events_processed": 40,
+      "elapsed_sec": 0.4352654449999136,
+      "throughput_eps": 91.89794517230271,
+      "latency_ms_p50": 9.860144499953094,
+      "latency_ms_p95": 10.520317799864621,
+      "cpu_utilisation_fraction": 1.010224465746578,
+      "rss_mb_peak": 39.28515625
     },
     {
-      "num_instances": 1000,
-      "events_processed": 150,
-      "elapsed_sec": 0.7228002379997633,
-      "throughput_eps": 207.5262183298411,
-      "latency_ms_p50": 4.690050001045165,
-      "latency_ms_p95": 4.840290000174718,
-      "cpu_utilisation_fraction": 0.9956553142184554,
-      "rss_mb_peak": 389.79296875
-    },
-    {
-      "num_instances": 5000,
-      "events_processed": 150,
-      "elapsed_sec": 0.7259158990000287,
-      "throughput_eps": 206.63550723524526,
-      "latency_ms_p50": 4.713659999652009,
-      "latency_ms_p95": 4.873212400070769,
-      "cpu_utilisation_fraction": 1.005156657437717,
-      "rss_mb_peak": 389.57421875
-    },
-    {
-      "num_instances": 10000,
-      "events_processed": 150,
-      "elapsed_sec": 0.7241234929988423,
-      "throughput_eps": 207.1469872891416,
-      "latency_ms_p50": 4.701076000856119,
-      "latency_ms_p95": 4.827118749653891,
-      "cpu_utilisation_fraction": 0.9938219596204156,
-      "rss_mb_peak": 390.88671875
+      "num_instances": 500,
+      "events_processed": 40,
+      "elapsed_sec": 0.41972086999976455,
+      "throughput_eps": 95.30143211611669,
+      "latency_ms_p50": 9.8908750001101,
+      "latency_ms_p95": 10.017967599742406,
+      "cpu_utilisation_fraction": 1.0002299219002324,
+      "rss_mb_peak": 39.30078125
     }
   ],
   "arrival_sweep": [
     {
-      "target_arrival_rate_eps": 200,
-      "duration_sec": 3.006437312000344,
-      "submitted": 563,
-      "committed": 563,
+      "target_arrival_rate_eps": 200.0,
+      "duration_sec": 1.0031873820003057,
+      "submitted": 168,
+      "committed": 168,
       "dead_lettered": 0,
-      "achieved_arrival_rate_eps": 187.26483926764664,
-      "achieved_commit_rate_eps": 187.26483926764664,
-      "max_queue_depth_observed": 8,
+      "achieved_arrival_rate_eps": 167.46622118094865,
+      "achieved_commit_rate_eps": 167.46622118094865,
+      "max_queue_depth_observed": 1,
       "backlog_at_end": 0,
       "keeping_up": true
     },
     {
-      "target_arrival_rate_eps": 800,
-      "duration_sec": 3.0021329219998734,
-      "submitted": 2057,
-      "committed": 2057,
+      "target_arrival_rate_eps": 800.0,
+      "duration_sec": 1.0010192639997513,
+      "submitted": 538,
+      "committed": 538,
       "dead_lettered": 0,
-      "achieved_arrival_rate_eps": 685.179521841334,
-      "achieved_commit_rate_eps": 685.179521841334,
-      "max_queue_depth_observed": 13,
-      "backlog_at_end": 0,
-      "keeping_up": true
-    },
-    {
-      "target_arrival_rate_eps": 2000,
-      "duration_sec": 3.001405168000929,
-      "submitted": 4293,
-      "committed": 4293,
-      "dead_lettered": 0,
-      "achieved_arrival_rate_eps": 1430.3300486616179,
-      "achieved_commit_rate_eps": 1430.3300486616179,
+      "achieved_arrival_rate_eps": 537.4521943267355,
+      "achieved_commit_rate_eps": 537.4521943267355,
       "max_queue_depth_observed": 2,
       "backlog_at_end": 0,
-      "keeping_up": true
-    },
-    {
-      "target_arrival_rate_eps": 5000,
-      "duration_sec": 3.0003406439991522,
-      "submitted": 7586,
-      "committed": 7586,
-      "dead_lettered": 0,
-      "achieved_arrival_rate_eps": 2528.3795742234875,
-      "achieved_commit_rate_eps": 2528.3795742234875,
-      "max_queue_depth_observed": 89,
-      "backlog_at_end": 0,
-      "keeping_up": true
-    },
-    {
-      "target_arrival_rate_eps": 10000,
-      "duration_sec": 3.000091526999313,
-      "submitted": 9490,
-      "committed": 9490,
-      "dead_lettered": 0,
-      "achieved_arrival_rate_eps": 3163.236826141729,
-      "achieved_commit_rate_eps": 3163.236826141729,
-      "max_queue_depth_observed": 165,
-      "backlog_at_end": 165,
       "keeping_up": true
     }
   ],
   "ledger_write_reduction": {
-    "on_chain_bytes_mean": 762.46,
-    "full_payload_bytes_mean": 1391.94,
+    "on_chain_bytes_mean": 771.45,
+    "full_payload_bytes_mean": 1270.0083333333334,
     "registered_anchoring_rate": 0.1143,
-    "measured_anchoring_rate": 0.973,
+    "measured_anchoring_rate": 0.7083333333333334,
     "batch_factor": 100,
     "tx_count_reduction_pct": 99.0,
     "min_batch_factor_for_1000tps": 2,
-    "offchain_marginal_reduction_pct": 45.22321364426628,
-    "combined_reduction_at_registered_rate_pct": 93.73901331953964,
-    "combined_reduction_at_measured_rate_pct": 46.702186875871085
+    "offchain_marginal_reduction_pct": 39.25630409249283,
+    "combined_reduction_at_registered_rate_pct": 93.05699555777193,
+    "combined_reduction_at_measured_rate_pct": 56.973215398849085
   },
   "icr": {
     "aggregate_at_gate": {
       "gate": 0.95,
-      "integrity_coverage_ratio": 0.98224043715847,
-      "on_chain_volume": 0.9693333333333334,
-      "attack_count": 1464
+      "integrity_coverage_ratio": 0.96,
+      "on_chain_volume": 0.16,
+      "attack_count": 25
     },
     "per_category_no_flooring": {
       "DDoS": {
         "gate_used": 0.95,
-        "attack_count": 1017,
+        "attack_count": 17,
+        "icr": 1.0
+      },
+      "Bot": {
+        "gate_used": 0.95,
+        "attack_count": 2,
+        "icr": 1.0
+      },
+      "BruteForce": {
+        "gate_used": 0.95,
+        "attack_count": 2,
         "icr": 1.0
       },
       "DoS": {
         "gate_used": 0.95,
-        "attack_count": 287,
+        "attack_count": 3,
         "icr": 1.0
       },
-      "Mirai": {
-        "gate_used": 0.95,
-        "attack_count": 111,
-        "icr": 1.0
-      },
-      "Recon": {
-        "gate_used": 0.95,
-        "attack_count": 22,
-        "icr": 1.0
-      },
-      "Spoofing": {
-        "gate_used": 0.95,
-        "attack_count": 26,
-        "icr": 0.0
-      },
-      "BruteForce": {
+      "Infiltration": {
         "gate_used": 0.95,
         "attack_count": 1,
-        "icr": 1.0
+        "icr": 0.0
       }
     },
     "per_category_with_flooring": {
       "DDoS": {
         "gate_used": 0.95,
-        "attack_count": 1017,
+        "attack_count": 17,
         "icr": 1.0
       },
-      "DoS": {
+      "Bot": {
         "gate_used": 0.95,
-        "attack_count": 287,
-        "icr": 1.0
-      },
-      "Mirai": {
-        "gate_used": 0.95,
-        "attack_count": 111,
-        "icr": 1.0
-      },
-      "Recon": {
-        "gate_used": 0.95,
-        "attack_count": 22,
-        "icr": 1.0
-      },
-      "Spoofing": {
-        "gate_used": 0.2,
-        "attack_count": 26,
+        "attack_count": 2,
         "icr": 1.0
       },
       "BruteForce": {
         "gate_used": 0.95,
-        "attack_count": 1,
+        "attack_count": 2,
         "icr": 1.0
+      },
+      "DoS": {
+        "gate_used": 0.95,
+        "attack_count": 3,
+        "icr": 1.0
+      },
+      "Infiltration": {
+        "gate_used": 0.95,
+        "attack_count": 1,
+        "icr": 0.0
       }
     },
     "category_floors": {
@@ -200,24 +161,24 @@
     }
   },
   "processor_overhead": {
-    "baseline_cpu_time_sec": 1.7199999999999998,
-    "integrated_cpu_time_sec": 1.8900000000000006,
-    "baseline_cpu_utilisation_fraction": 1.0010904587355232,
-    "integrated_cpu_utilisation_fraction": 0.9999699876731218,
-    "baseline_wall_clock_sec": 1.7181264539995027,
-    "integrated_wall_clock_sec": 1.8900567250002496,
-    "overhead_pct": 9.883720930232608,
-    "baseline_rss_mb_peak": 215.875,
-    "integrated_rss_mb_peak": 217.60546875
+    "baseline_cpu_time_sec": 1.36,
+    "integrated_cpu_time_sec": 1.4999999999999996,
+    "baseline_cpu_utilisation_fraction": 0.9986446182296133,
+    "integrated_cpu_utilisation_fraction": 1.0042252805456178,
+    "baseline_wall_clock_sec": 1.3618458209998607,
+    "integrated_wall_clock_sec": 1.4936887460003163,
+    "overhead_pct": 10.294117647058783,
+    "baseline_rss_mb_peak": 37.328125,
+    "integrated_rss_mb_peak": 39.11328125
   },
   "stability_short_run": {
-    "duration_sec": 8.007608386998982,
-    "submitted": 2281,
-    "committed": 2281,
+    "duration_sec": 2.0016141669998433,
+    "submitted": 518,
+    "committed": 518,
     "dead_lettered": 0,
     "zero_event_loss": true,
     "clean_shutdown": true,
-    "injected_transient_failures": 237,
+    "injected_transient_failures": 56,
     "max_consecutive_dead_letters": 0,
     "unhandled_exceptions": 0
   }

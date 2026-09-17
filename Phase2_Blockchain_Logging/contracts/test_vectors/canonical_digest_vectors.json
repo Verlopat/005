@@ -74,7 +74,7 @@
     },
     {
       "name": "realistic_alert_event_v1",
-      "description": "A full alert event shaped exactly like contracts/alert_event.schema.json minus payload_digest.",
+      "description": "Historical: an alert event under contract v1.0.0, which described a different detector (binary classifier on CICIoT2023). Retained unchanged because it is still a valid canonicalisation test and the Go implementation is verified against it. See realistic_alert_event_v2 for the contract the layers exchange now.",
       "input": {
         "contract_version": "1.0.0",
         "event_id": "5f2c9b3e-7d0a-4a41-9c2a-1b6a2e7d5f00",
@@ -109,6 +109,54 @@
       },
       "expected_canonical": "{\"calibrated_confidence\":0.9931,\"calibration\":{\"is_calibrated\":false,\"method\":\"none\"},\"contract_version\":\"1.0.0\",\"destination_address\":null,\"event_id\":\"5f2c9b3e-7d0a-4a41-9c2a-1b6a2e7d5f00\",\"feature_attributions\":[{\"contribution\":0.41,\"feature\":\"Rate\"}],\"inference_latency_ms\":0.31,\"model\":{\"model_digest\":\"aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa\",\"model_id\":\"stahn-phase1\",\"version_label\":\"stahn_v1_98.62_acc\"},\"resource_id\":\"i-0abc123def4567890\",\"severity\":\"high\",\"source_address\":null,\"threat_category\":\"DDoS\",\"timestamp\":\"2026-09-15T18:04:12.501Z\",\"triggering_features\":{\"Protocol Type\":6.0,\"Rate\":16251.95},\"verdict\":\"ATTACK\"}",
       "expected_sha256": "8641677b99492dd9bccf5bc380e28982c959c5be35e1014462dc42fbfd7b25f7"
+    },
+    {
+      "name": "realistic_alert_event_v2",
+      "description": "An alert event under contract v2.0.0 as produced by the Phase 1 -> Phase 2 adapter: one of Phase 1's seven coarse threat categories, isotonic calibration with the measured ECE, and the producer's frozen-contract digests carried in detection_contract. Infiltration at low confidence is used deliberately, since that is the case the class-aware anchoring floor exists to cover.",
+      "input": {
+        "contract_version": "2.0.0",
+        "event_id": "5f2c9b3e-7d0a-4a41-9c2a-1b6a2e7d5f00",
+        "timestamp": "2026-09-15T18:04:12.501Z",
+        "verdict": "ATTACK",
+        "threat_category": "Infiltration",
+        "severity": "critical",
+        "calibrated_confidence": 0.303016,
+        "calibration": {
+          "is_calibrated": true,
+          "method": "isotonic",
+          "expected_calibration_error": 8.135997203703995e-05
+        },
+        "source_address": "10.0.0.7:44321",
+        "destination_address": "10.0.1.9:443",
+        "resource_id": "cloud-res-9f2b1c4d8e0a",
+        "triggering_features": {
+          "IN_BYTES": 1480.0,
+          "LONGEST_FLOW_PKT": 1500.0
+        },
+        "model": {
+          "model_id": "fa8d2667cc39cea50abe78f813133ead89e9dea3a317da436c14dcfc41fbf820",
+          "model_digest": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+          "version_label": "flat_tuned_tau-fa8d2667cc39"
+        },
+        "feature_attributions": [
+          {
+            "feature": "IN_BYTES",
+            "contribution": 0.412
+          }
+        ],
+        "detection_contract": {
+          "producer": "Phase_1/10_alert_contract.py",
+          "schema_version": "1.0.0",
+          "event_hash": "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
+          "feature_digest": "cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc",
+          "anchor_gate_tau": 0.9997655153274536,
+          "producer_anchor_decision": true,
+          "digest_verified_by_consumer": true
+        },
+        "inference_latency_ms": 0.42
+      },
+      "expected_canonical": "{\"calibrated_confidence\":0.303016,\"calibration\":{\"expected_calibration_error\":8.135997203703995e-05,\"is_calibrated\":true,\"method\":\"isotonic\"},\"contract_version\":\"2.0.0\",\"destination_address\":\"10.0.1.9:443\",\"detection_contract\":{\"anchor_gate_tau\":0.9997655153274536,\"digest_verified_by_consumer\":true,\"event_hash\":\"bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb\",\"feature_digest\":\"cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc\",\"producer\":\"Phase_1/10_alert_contract.py\",\"producer_anchor_decision\":true,\"schema_version\":\"1.0.0\"},\"event_id\":\"5f2c9b3e-7d0a-4a41-9c2a-1b6a2e7d5f00\",\"feature_attributions\":[{\"contribution\":0.412,\"feature\":\"IN_BYTES\"}],\"inference_latency_ms\":0.42,\"model\":{\"model_digest\":\"aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa\",\"model_id\":\"fa8d2667cc39cea50abe78f813133ead89e9dea3a317da436c14dcfc41fbf820\",\"version_label\":\"flat_tuned_tau-fa8d2667cc39\"},\"resource_id\":\"cloud-res-9f2b1c4d8e0a\",\"severity\":\"critical\",\"source_address\":\"10.0.0.7:44321\",\"threat_category\":\"Infiltration\",\"timestamp\":\"2026-09-15T18:04:12.501Z\",\"triggering_features\":{\"IN_BYTES\":1480.0,\"LONGEST_FLOW_PKT\":1500.0},\"verdict\":\"ATTACK\"}",
+      "expected_sha256": "84d521605caa97263dbf3a8d83646fb33d4612131816a4b1641a8094d183f685"
     }
   ]
 }

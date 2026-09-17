@@ -36,8 +36,9 @@ sys.path.insert(0, str(PHASE3_ROOT))
 
 from perf._phase2_bridge import ensure_phase2_importable  # noqa: E402
 from perf.async_pipeline import AsyncSubmissionService, InMemoryQueueBackend, RetryPolicy  # noqa: E402
-from perf.comparative_benchmark import format_table, literature_rows, this_framework_row  # noqa: E402
-from perf.load_generator import LoadProfile, SyntheticEventStream  # noqa: E402
+from perf.comparative_benchmark import (format_table, literature_rows,  # noqa: E402
+                                        protocol_notes, this_framework_rows)
+from perf.load_generator import LoadProfile, Phase1AlertStream  # noqa: E402
 from perf.resource_profiler import ResourceMonitor, overhead_pct  # noqa: E402
 from perf.scalability_harness import run_arrival_rate_sweep, run_instance_count_sweep  # noqa: E402
 from perf.stability_test import run_stability_test  # noqa: E402
@@ -57,7 +58,8 @@ def load_phase2_results() -> dict:
     path = PHASE2_ROOT / "outputs" / "phase2_results.json"
     if not path.is_file():
         print("[!] Phase2_Blockchain_Logging/outputs/phase2_results.json not found; run "
-              "'python3 run_phase2.py' first for a complete comparative benchmark row.")
+              "'python3 Phase2_Blockchain_Logging/scripts/generate_phase2_results.py' "
+              "first for a complete comparative benchmark row.")
         return {}
     return json.loads(path.read_text(encoding="utf-8"))
 
@@ -210,9 +212,11 @@ def main() -> None:
 
     phase2_results = load_phase2_results()
 
-    print(f"[*] Generating {args.num_events} synthetic events from CICIoT2023_Sample.csv for the fixed-batch metrics ...")
-    stream = SyntheticEventStream(LoadProfile(num_instances=2000, arrival_rate_eps=0.0), seed=2026)
+    stream = Phase1AlertStream(LoadProfile(num_instances=2000, arrival_rate_eps=0.0), seed=2026)
+    print(f"[*] Generating {args.num_events} events for the fixed-batch metrics "
+          f"(source={stream.source}, label space = Phase 1's 7 coarse categories) ...")
     events = list(stream.iter_events(args.num_events))
+    event_source = stream.describe_source()
 
     print("[*] Metric 4: Integrity Coverage Ratio, aggregate + per-category, with and without gate flooring ...")
     icr_aggregate = integrity_coverage_ratio(events, gate=args.icr_gate)
@@ -267,10 +271,11 @@ def main() -> None:
     print("[*] Comparative benchmarking against published systems ...")
     rows = literature_rows()
     if phase2_results:
-        rows.append(
-            this_framework_row(phase1_accuracy=0.9862, phase1_attack_precision=0.9959, phase2_results=phase2_results)
-        )
+        # Detection figures are read from Phase 1's committed metrics table, not
+        # passed in by hand, so this row cannot drift from the measured model.
+        rows.extend(this_framework_rows(phase2_results))
     comparison_table = format_table(rows)
+    comparison_protocol_notes = protocol_notes()
 
     # ---------------------------------------------------------------- report
     lines = []
@@ -318,9 +323,9 @@ def main() -> None:
         f"`Phase2_Blockchain_Logging/outputs/phase2_results.json` (this project's own detection layer/dataset): "
         f"on-chain volume at gate={args.icr_gate} = "
         f"{measured_anchoring_rate * 100 if measured_anchoring_rate is not None else float('nan'):.1f}% "
-        f"({'not yet generated — run python3 run_phase2.py first' if not phase2_results else 'see Phase 2 report for dataset caveats'}) | "
-        f"Registered figure met on the revised Objective 1 dataset; this project's own STAHN/CICIoT2023 confidence "
-        f"distribution anchors a different fraction — see note below |"
+        f"({'not yet generated — run Phase2_Blockchain_Logging/scripts/generate_phase2_results.py first' if not phase2_results else 'see Phase 2 report for dataset caveats'}) | "
+        f"Registered figure met on the Objective 1 dataset (NF-CSE-CIC-IDS2018-v2, LightGBM detector); a "
+        f"synthetic or replayed confidence distribution anchors a different fraction — see note below |"
     )
     lines.append(
         f"| 3b | Ledger write reduction, selective logging with Merkle batching | > 99% of transaction count against "
@@ -360,10 +365,12 @@ def main() -> None:
     )
     lines.append(
         "| 6 | Performance against existing systems | Pareto-superior on F1 and latency against comparable hybrid "
-        "frameworks under matched protocol | See the comparative benchmark table below — protocol is **not** matched "
-        "across datasets/platforms, stated explicitly per Objective 3's own instruction | Comparative data assembled "
-        "with citations; a matched-protocol Pareto claim requires re-running this project's own pipeline on each "
-        "cited paper's dataset, out of scope for this run |"
+        "frameworks under matched protocol | See the comparative benchmark table below. Detection accuracy IS now "
+        "compared under a matched dataset (published NF-CSE-CIC-IDS2018-v2 results, rows marked matched=yes); "
+        "latency and storage are **not** matched, because this project's figures are single-host mock-ledger "
+        "measurements while the cited systems ran real Fabric/PoA networks | Partially matched: the detection "
+        "comparison is like-for-like on dataset (with the weighted-vs-macro F1 caveat stated below); a full "
+        "Pareto claim on latency additionally requires a deployed Fabric network |"
     )
     lines.append(
         f"| 7 | System stability under sustained load | Zero event loss and zero service failure across a 24-hour "
@@ -416,6 +423,11 @@ def main() -> None:
     lines.append("")
     lines.append(comparison_table)
     lines.append("")
+    lines.append("### Protocol differences that must be published with this table")
+    lines.append("")
+    for note in comparison_protocol_notes:
+        lines.append(f"- {note}")
+    lines.append("")
 
     lines.append("## Methodological notes for the paper")
     lines.append("")
@@ -430,9 +442,10 @@ def main() -> None:
         "larger raw-evidence payload than this project's compact structured JSON alert."
     )
     lines.append(
-        "- **Row 6 (comparative benchmarking) is explicitly not a matched-protocol comparison.** Datasets, "
-        "blockchain topologies, and hardware differ across every cited system; see docs/comparative_benchmark.md "
-        "for the full list of protocol differences that must be disclosed alongside the table."
+        "- **Row 6 (comparative benchmarking) is matched on dataset but not on platform.** Published "
+        "NF-CSE-CIC-IDS2018-v2 results are included as a like-for-like detection comparison, but blockchain "
+        "topologies and hardware differ across every cited system. The protocol differences that must be "
+        "published alongside the table are listed immediately below it and in docs/comparative_benchmark.md."
     )
     lines.append(
         "- **Arrival-rate scalability is a single 2-vCPU host measurement**, not a distributed 10,000-node result. "
@@ -442,8 +455,9 @@ def main() -> None:
     )
     lines.append(
         "- **Processor overhead** compares this project's own detection-only loop against its own full logging "
-        "pipeline on the same event batch; it does not include the cost of a real ML inference pass (Phase 1's "
-        "STAHN model was not run in this environment — see Phase2_Blockchain_Logging/README.md's Phase 1 alignment note)."
+        "pipeline on the same event batch; it does not include the cost of a real LightGBM inference pass, because "
+        "this run consumes already-emitted Phase 1 alerts rather than re-running the detector. Phase 1 measures "
+        "inference latency separately (p99 target < 50 ms, single event, CPU only)."
     )
     lines.append("")
 
@@ -453,6 +467,10 @@ def main() -> None:
     raw = {
         "generated_at": run_started_at,
         "num_events": len(events),
+        # Which detector/dataset produced the events these figures describe, so a
+        # reader never has to infer it from prose.
+        "event_source": event_source,
+        "comparative_protocol_notes": comparison_protocol_notes,
         "e2e_latency": e2e_latency,
         "instance_sweep": [asdict(r) for r in instance_sweep],
         "arrival_sweep": [asdict(r) for r in arrival_sweep],

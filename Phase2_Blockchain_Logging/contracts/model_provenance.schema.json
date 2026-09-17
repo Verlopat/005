@@ -1,8 +1,8 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
-  "$id": "https://verlopat.example/contracts/stahn-model-provenance-1.0.0.json",
-  "title": "STAHN Model Provenance Record",
-  "description": "Anchored once per retraining cycle. Establishes the 'immutable birth certificate' directed by the Phase 1 handoff document: an auditor who holds an alert's model.model_digest can look up exactly which artifact produced it and when that artifact entered service.",
+  "$id": "https://verlopat.example/contracts/model-provenance-1.0.0.json",
+  "title": "Detection Model Provenance Record",
+  "description": "Anchored once per retraining cycle. Establishes the 'immutable birth certificate' required by Objective 2: an auditor who holds an alert's model.model_digest can look up exactly which artifact produced it and when that artifact entered service. The deployed detector is the Phase 1 LightGBM multiclass model over 25 NetFlow features and seven coarse threat categories, trained on NF-CSE-CIC-IDS2018-v2.",
   "type": "object",
   "additionalProperties": false,
   "required": [
@@ -20,7 +20,7 @@
   ],
   "properties": {
     "contract_version": {"type": "string", "const": "1.0.0"},
-    "model_id": {"type": "string", "description": "Stable logical identifier for the deployed model family, e.g. 'stahn-phase1'."},
+    "model_id": {"type": "string", "description": "Stable logical identifier for the deployed model. Carries Phase 1's own model_card.json:model_id_sha256, so an alert traces back to the producer's identifier and not merely to a label chosen by the logging layer."},
     "model_digest": {
       "type": "string",
       "pattern": "^[0-9a-f]{64}$",

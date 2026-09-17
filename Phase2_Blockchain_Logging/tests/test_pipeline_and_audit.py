@@ -1,6 +1,7 @@
 import pytest
 
-from src.alert_builder import build_alert_from_oracle_response
+from conftest import make_phase1_alert
+from src.alert_builder import build_alert_from_phase1_alert
 from src.anchoring_policy import AnchoringPolicy
 from src.audit import audit_event, compliance_report
 from src.evidence_store import LocalContentAddressedStore
@@ -9,15 +10,20 @@ from src.pipeline import Phase2Pipeline
 from src.signing import generate_agent_identity
 
 
-def make_event(is_attack=True, confidence=0.995, resource_id="i-001"):
-    return build_alert_from_oracle_response(
-        oracle_response={"is_attack": is_attack, "confidence_score": confidence, "model_version": "test"},
-        feature_names=["Rate", "Protocol Type"],
-        feature_values=[16251.95, 6.0],
-        model_id="stahn-phase1",
+def make_event(is_attack=True, confidence=0.995, resource_id="i-001", threat_class=None):
+    """An Objective 2 event built through the real Phase 1 adapter.
+
+    Using the production path here means these pipeline/audit tests also cover
+    cross-layer digest verification, rather than a shortcut constructor that
+    could diverge from what Phase 1 actually emits.
+    """
+    if threat_class is None:
+        threat_class = "DDoS" if is_attack else "Benign"
+    alert = make_phase1_alert(threat_class, confidence, resource_id=resource_id)
+    return build_alert_from_phase1_alert(
+        alert,
+        model_id="fa8d2667cc39cea50abe78f813133ead89e9dea3a317da436c14dcfc41fbf820",
         model_digest="a" * 64,
-        resource_id=resource_id,
-        inference_latency_ms=0.3,
     )
 
 
